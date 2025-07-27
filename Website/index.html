@@ -20,12 +20,58 @@
             <!-- 左欄位 -->
             <div class="col-md-6">
                 <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Select tool</label>
+                        <select class="form-select" id="selectTool" onchange="updateExtensionOptions()">
+                            <option value="" disabled selected>請選擇刀具</option>
+                            <option value="R05507-06512">R05507-06512</option>
+                            <option value="R05510-10018">R05510-10018</option>
+                            <option value="R06005-05006">R06005-05006</option>
+                            <option value="R06005-05010">R06005-05010</option>
+                            <option value="R06007-06810">R06007-06810</option>
+                            <option value="R06010-08510">R06010-08510</option>
+                            <option value="R06010-10010">R06010-10010</option>
+                            <!-- <option value="00-99323-012-1525">00-99323-012-1525</option>
+                            <option value="00-99323-016-2030">00-99323-016-2030</option>
+                            <option value="00-99323-020-2540">00-99323-020-2540</option>
+                            <option value="00-99323-025-3050">00-99323-025-3050</option> -->
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Select workpiece material</label>
+
+                        <select class="form-select" id="selectMaterial" onchange="updateCuttingSpeed()">
+
+                            <option value="" disabled selected>請選擇材料</option>
+                            <option value="Material01" style="background-color:#0066CC; color:white;">Carbon steel
+                            </option><!-- P類 淺藍 -->
+                            <option value="Material04" style="background-color:#0066CC; color:white;">Alloy steel
+                            </option><!-- P類 淺藍 -->
+                            <option value="Material06" style="background-color:#FFC000;">Stainless steel</option>
+                            <!-- M類 黃色 -->
+                            <option value="Material07" style="background-color:#FF0000; color:white;">Cast iron</option>
+                            <!-- K類 紅色 -->
+                            <option value="Material08" style="background-color:#00B050; color:white;">Non-ferrous metal
+                            </option><!-- N類 綠色 -->
+                            <option value="Material12" style="background-color:#A6A6A6;">Hardened steel &lt; HRC50
+                            </option><!-- H類 灰色 -->
+                        </select>
+                    </div>
+
+                    <hr class="my-5" />
+
                     <!-- 刀具參數 -->
                     <div class="col-md-6">
                         <label class="form-label">Tool Diameter</label>
+                        <input type="text" class="form-control" id="toolDiameter" readonly placeholder="請選擇刀具/mm"
+                            oninput="updateSpindleSpeed()">
+                    </div>
+                    <!-- <div class="col-md-6">
+                        <label class="form-label">Tool Diameter</label>
                         <input type="number" class="form-control" id="toolDiameter" placeholder="mm"
                             oninput="updateSpindleSpeed()" />
-                    </div>
+                    </div> -->
                     <div class="col-md-6">
                         <label class="form-label">Cutting Speed</label>
                         <input type="number" class="form-control" id="vc" placeholder="m/min"
@@ -37,13 +83,19 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Number of Teeth</label>
-                        <input type="number" class="form-control" id="z" oninput="updateFeedRate()" />
+                        <input type="number" class="form-control" id="z" value="6" readonly
+                            oninput="updateFeedRate()" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Feed per Tooth</label>
-                        <input type="number" class="form-control" id="fz" placeholder="mm/tooth"
+                        <input type="number" class="form-control" id="fz" placeholder="mm/tooth" step="0.001"
                             oninput="updateFeedRate()" />
                     </div>
+                    <!-- <div class="col-md-6">
+                        <label class="form-label">Feed per Tooth</label>
+                        <input type="number" class="form-control" id="fz" placeholder="mm/tooth"
+                            oninput="updateFeedRate()" />
+                    </div> -->
                     <div class="col-md-6">
                         <label class="form-label">Feed Rate</label>
                         <input type="number" class="form-control" id="vf" placeholder="mm/min" readonly />
@@ -53,17 +105,29 @@
 
                     <!-- 螺線參數 -->
                     <div class="col-md-6">
+                        <label class="form-label">Thread Size</label>
+                        <select class="form-select" id="selectThreadSize">
+                            <option value="" disabled selected>請先選擇刀具</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label">Outer-Dia</label>
-                        <input type="number" class="form-control" id="od" placeholder="mm" />
+                        <input type="number" class="form-control" id="od" placeholder="mm" step="0.001" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Tap Drill Diameter</label>
-                        <input type="number" class="form-control" id="tapDrill" placeholder="mm" />
+                        <input type="number" class="form-control" id="tapDrill" placeholder="mm" step="0.001" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Thread Pitch</label>
                         <input type="number" class="form-control" id="pitch" placeholder="mm" />
                     </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Thread Details</label>
+                        <textarea id="threadInfo" class="form-control" style="max-height: 310px; overflow-y: auto;"
+                            readonly></textarea>
+                    </div>
+
 
                     <hr class="my-5" />
 
@@ -142,6 +206,9 @@
     <!-- JS 區域 -->
 
     <script>
+
+
+
         function updatePassInputs() {
             const passCount = parseInt(document.getElementById("passes").value);
             const container = document.getElementById("passInputs");
@@ -178,18 +245,156 @@
             }
         }
 
-
         function updateSpindleSpeed() {
             const d = parseFloat(document.getElementById("toolDiameter").value);
             const vc = parseFloat(document.getElementById("vc").value);
+
+            console.log("Tool Diameter =", d);
+            console.log("Cutting Speed =", vc);
+
             if (!isNaN(d) && d > 0 && !isNaN(vc) && vc > 0) {
                 const n = (1000 * vc) / (Math.PI * d);
                 document.getElementById("n").value = n.toFixed(0);
             } else {
                 document.getElementById("n").value = "";
             }
+
             updateFeedRate();
         }
+
+
+
+        function updateExtensionOptions() {
+            const toolSelect = document.getElementById("selectTool");
+            const extensionSelect = document.getElementById("selectExtensionBar");
+            const extensionBarRow = document.getElementById("extensionBarRow");
+
+            const selectedTool = toolSelect.value;
+
+            const Dc = getDcFromTool(selectedTool);
+            document.getElementById("toolDiameter").value = Dc;
+            updateSpindleSpeed();  // 自動計算 RPM
+
+            if (toolsWithoutExtension.includes(selectedTool)) {
+                extensionBarRow.style.display = "none";
+                return;
+            } else {
+                extensionBarRow.style.display = "block";
+            }
+
+            extensionSelect.innerHTML = '<option value="" disabled selected>請選擇延長桿</option>';
+
+            if (extensionOptionsMap[selectedTool]) {
+                extensionOptionsMap[selectedTool].forEach(function (extCode) {
+                    const option = document.createElement("option");
+                    option.value = extCode;
+                    option.textContent = extCode;
+                    extensionSelect.appendChild(option);
+                });
+            }
+        }
+
+        const toolThreadMap = {
+            // "R05507-06512": ["M11 × 1.0", "M12 × 1.25", "M12 × 1.5"],
+            // "R05510-10018": ["M14 × 1.5", "M16", "M16 × 2.0"],
+            "R06005-05006": ["請選擇加工螺紋", "M6 x 0.75", "M7 x 0.75", "M8 x 0.75", "M9 x 0.75", "M10 x 0.75", "M11 x 0.75"],
+            "R06005-05010": ["請選擇加工螺紋", "M6", "M7", "M8 x 1.0", "M9 x 1.0", "M10 x 1.0", "M11 x 1.0", "M12 x 1.0", "M14 x 1.0", "M15 x 1.0", "M16 x 1.0", "M17 x 1.0", "M18 x 1.0", "M20 x 1.0", "M22 x 1.0", "M24 x 1.0"],
+            "R06007-06810": ["請選擇加工螺紋", "M8", "M9", "M8 x 1.0", "M9 x 1.0", "M10 x 1.0", "M10 x 1.25", "M11 x 1.0", "M12 x 1.0", "M12 x 1.25", "M14 x 1.0", "M14 x 1.25", "M15 x 1.0", "M16 x 1.0", "M17 x 1.0", "M18 x 1.0", "M20 x 1.0", "M22 x 1.0", "M24 x 1.0"],
+            "R06010-08510": ["請選擇加工螺紋", "M10", "M11", "M10 x 1.0", "M10 x 1.25", "M11 x 1.0", "M12 x 1.0", "M12 x 1.25", "M12 x 1.5", "M14 x 1.0", "M14 x 1.25", "M14 x 1.5", "M15 x 1.0", "M15 x 1.5", "M16 x 1.0", "M16 x 1.5", "M17 x 1.0", "M17 x 1.5", "M18 x 1.0", "M18 x 1.5", "M20 x 1.0", "M20 x 1.5", "M22 x 1.0", "M22 x 1.5", "M24 x 1.0", "M24 x 1.5"],
+            "R06010-10010": ["請選擇加工螺紋", "M12", "M14", "M16", "M11 x 1.0", "M12 x 1.0", "M12 x 1.25", "M12 x 1.5", "M14 x 1.0", "M14 x 1.25", "M14 x 1.5", "M15 x 1.0", "M15 x 1.5", "M16 x 1.0", "M16 x 1.5", "M17 x 1.0", "M17 x 1.5", "M18 x 1.0", "M18 x 1.5", "M18 x 2.0", "M20 x 1.0", "M20 x 1.5", "M20 x 2.0", "M22 x 1.0", "M22 x 1.5", "M22 x 2.0", "M24 x 1.0", "M24 x 1.5"]
+        };
+
+        function updateThreadSizeOptions(toolCode) {
+            const threadSelect = document.getElementById("selectThreadSize");
+            threadSelect.innerHTML = ""; // 清空舊選項
+
+            const sizes = toolThreadMap[toolCode];
+
+            if (!sizes || sizes.length === 0) {
+                const option = document.createElement("option");
+                option.disabled = true;
+                option.selected = true;
+                option.textContent = "此刀具無螺紋建議尺寸";
+                threadSelect.appendChild(option);
+                return;
+            }
+
+            sizes.forEach(size => {
+                const option = document.createElement("option");
+                option.value = size;
+                option.textContent = size;
+                threadSelect.appendChild(option);
+            });
+        }
+        function updateExtensionOptions() {
+            const toolSelect = document.getElementById("selectTool");
+            const selectedTool = toolSelect.value;
+
+            const Dc = getDcFromTool(selectedTool);
+            document.getElementById("toolDiameter").value = Dc;
+            updateSpindleSpeed();
+
+            // 延長桿與其他功能略...
+            // 加入這行讓 Thread Size 更新
+            updateThreadSizeOptions(selectedTool);
+        }
+
+
+
+
+        function getDcFromTool(code) {
+            switch (code) {
+                case "R05507-06512":
+                    return 6.56;
+                case "R05510-10018":
+                    return 10.0;
+                // 55°
+
+                case "R06005-05006":
+                    return 5.0;
+                case "R06005-05010":
+                    return 5.0;
+                case "R06007-06810":
+                    return 6.8;
+                case "R06010-08510":
+                    return 8.5;
+                case "R06010-10010":
+                    return 10.0;
+                // 60°
+
+                default:
+                    return 0;
+            }
+        }
+        // 定義建議切削速度
+        const cuttingSpeedMap = {
+            Material01: { vc: 120.0, fz: 0.013 },  // Carbon steel
+            Material04: { vc: 90.0, fz: 0.01 },  // Alloy steel
+            Material06: { vc: 80.0, fz: 0.01 }, // Stainless steel
+            Material07: { vc: 180.0, fz: 0.01 },  // Cast iron
+            Material08: { vc: 200.0, fz: 0.013 },  // Non-ferrous metal
+            Material12: { vc: 60.0, fz: 0.008 }   // Hardened steel < HRC50
+        };
+
+        function updateCuttingSpeed() {
+            const material = document.getElementById("selectMaterial").value;
+            const vcInput = document.getElementById("vc");
+            const fzInput = document.getElementById("fz");
+
+            const data = cuttingSpeedMap[material];
+
+            if (data) {
+                vcInput.value = data.vc;
+                fzInput.value = data.fz;
+                updateSpindleSpeed(); // 自動更新 RPM 與 Feed rate
+            } else {
+                vcInput.value = "";
+                fzInput.value = "";
+            }
+        }
+
+
+
 
         function updateFeedRate() {
             const z = parseFloat(document.getElementById("z").value);
@@ -284,6 +489,118 @@
             a.click();
         }
 
+        document.getElementById("selectThreadSize").addEventListener("change", function () {
+            const selectedThread = this.value;
+            const data = threadData[selectedThread];
+
+            if (data) {
+                document.getElementById("pitch").value = data.Pitch;
+                document.getElementById("od").value = data.MajorDiameter;
+                document.getElementById("tapDrill").value = data.TapDrillDiameter;
+
+                // 如果你有 textarea 顯示詳細資訊，也可以這樣處理：
+                const infoText = `
+Thread: ${selectedThread}
+Thread Type: ${data.ThreadType}
+Major Diameter: ${data.MajorDiameter} mm
+Pitch: ${data.Pitch} mm
+Root Radius: ${data.RootRadius} mm
+Pitch Diameter: ${data.PitchDiameter} mm
+Minor Diameter (Male): ${data.MinorDiameterMale} mm
+Minor Diameter (Female): ${data.MinorDiameterFemale} mm
+Thread Height (Male): ${data.ThreadHeightMale} mm
+Thread Height (Female): ${data.ThreadHeightFemale} mm
+Tap Drill Diameter: ${data.TapDrillDiameter} mm`;
+
+                document.getElementById("threadInfo").value = infoText;
+            }
+        });
+
+
+        const threadData = {
+            "M6": {
+                ThreadType: "Coarse", MajorDiameter: 6, Pitch: 1, RootRadius: 0.144,
+                PitchDiameter: 5.35, MinorDiameterMale: 4.773, MinorDiameterFemale: 4.917,
+                ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 5
+            },
+            "M7": {
+                ThreadType: "Coarse", MajorDiameter: 7, Pitch: 1, RootRadius: 0.144,
+                PitchDiameter: 6.35, MinorDiameterMale: 5.773, MinorDiameterFemale: 5.917,
+                ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 6
+            },
+            "M8": {
+                ThreadType: "Coarse", MajorDiameter: 8, Pitch: 1.25, RootRadius: 0.18,
+                PitchDiameter: 7.188, MinorDiameterMale: 6.466, MinorDiameterFemale: 6.647,
+                ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 6.8
+            },
+            "M9": {
+                ThreadType: "Coarse", MajorDiameter: 9, Pitch: 1.25, RootRadius: 0.18,
+                PitchDiameter: 8.188, MinorDiameterMale: 7.466, MinorDiameterFemale: 7.647,
+                ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 7.8
+            },
+            "M10": {
+                ThreadType: "Coarse", MajorDiameter: 10, Pitch: 1.5, RootRadius: 0.217,
+                PitchDiameter: 9.026, MinorDiameterMale: 8.16, MinorDiameterFemale: 8.376,
+                ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 8.5
+            },
+            "M11": {
+                ThreadType: "Coarse", MajorDiameter: 11, Pitch: 1.5, RootRadius: 0.217,
+                PitchDiameter: 10.026, MinorDiameterMale: 9.16, MinorDiameterFemale: 9.376,
+                ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 9.5
+            },
+            "M12": {
+                ThreadType: "Coarse", MajorDiameter: 12, Pitch: 1.75, RootRadius: 0.253,
+                PitchDiameter: 10.863, MinorDiameterMale: 9.853, MinorDiameterFemale: 10.106,
+                ThreadHeightMale: 1.074, ThreadHeightFemale: 0.947, TapDrillDiameter: 10.2
+            },
+            "M14": {
+                ThreadType: "Coarse", MajorDiameter: 14, Pitch: 2, RootRadius: 0.289,
+                PitchDiameter: 12.701, MinorDiameterMale: 11.564, MinorDiameterFemale: 11.835,
+                ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 12
+            },
+            "M16": {
+                ThreadType: "Coarse", MajorDiameter: 16, Pitch: 2, RootRadius: 0.289,
+                PitchDiameter: 14.701, MinorDiameterMale: 13.546, MinorDiameterFemale: 13.835,
+                ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 14
+            },
+            "M5.5 x 0.5": { ThreadType: "Fine", MajorDiameter: 5.5, Pitch: 0.5, RootRadius: 0.072, PitchDiameter: 5.175, MinorDiameterMale: 4.887, MinorDiameterFemale: 4.959, ThreadHeightMale: 0.307, ThreadHeightFemale: 0.271, TapDrillDiameter: 5 },
+            "M6 x 0.75": { ThreadType: "Fin", MajorDiameter: 6, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 5.513, MinorDiameterMale: 5.08, MinorDiameterFemale: 5.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 5.2 },
+            "M7 x 0.75": { ThreadType: "Fin", MajorDiameter: 7, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 6.513, MinorDiameterMale: 6.08, MinorDiameterFemale: 6.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 6.2 },
+            "M8 x 0.75": { ThreadType: "Fin", MajorDiameter: 8, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 7.513, MinorDiameterMale: 7.08, MinorDiameterFemale: 7.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 7.2 },
+            "M8 x 1.0": { ThreadType: "Fin", MajorDiameter: 8, Pitch: 1, RootRadius: 0.144, PitchDiameter: 7.35, MinorDiameterMale: 6.773, MinorDiameterFemale: 6.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 7 },
+            "M9 x 0.75": { ThreadType: "Fin", MajorDiameter: 9, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 8.513, MinorDiameterMale: 8.08, MinorDiameterFemale: 8.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 8.2 },
+            "M9 x 1.0": { ThreadType: "Fin", MajorDiameter: 9, Pitch: 1, RootRadius: 0.144, PitchDiameter: 8.35, MinorDiameterMale: 7.773, MinorDiameterFemale: 7.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 8 },
+            "M10 x 0.75": { ThreadType: "Fin", MajorDiameter: 10, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 9.513, MinorDiameterMale: 9.08, MinorDiameterFemale: 9.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 9.2 },
+            "M10 x 1.0": { ThreadType: "Fin", MajorDiameter: 10, Pitch: 1, RootRadius: 0.144, PitchDiameter: 9.35, MinorDiameterMale: 8.773, MinorDiameterFemale: 8.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 9 },
+            "M10 x 1.25": { ThreadType: "Fin", MajorDiameter: 10, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 9.188, MinorDiameterMale: 8.466, MinorDiameterFemale: 8.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 8.8 },
+            "M11 x 0.75": { ThreadType: "Fin", MajorDiameter: 11, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 10.513, MinorDiameterMale: 10.08, MinorDiameterFemale: 10.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 10.2 },
+            "M11 x 1.0": { ThreadType: "Fin", MajorDiameter: 11, Pitch: 1, RootRadius: 0.144, PitchDiameter: 10.35, MinorDiameterMale: 9.773, MinorDiameterFemale: 9.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 10 },
+            "M12 x 1.0": { ThreadType: "Fin", MajorDiameter: 12, Pitch: 1, RootRadius: 0.144, PitchDiameter: 11.35, MinorDiameterMale: 10.773, MinorDiameterFemale: 10.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 11 },
+            "M12 x 1.25": { ThreadType: "Fin", MajorDiameter: 12, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 11.188, MinorDiameterMale: 10.466, MinorDiameterFemale: 10.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 10.8 },
+            "M12 x 1.5": { ThreadType: "Fin", MajorDiameter: 12, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 11.026, MinorDiameterMale: 10.16, MinorDiameterFemale: 10.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 10.5 },
+            "M14 x 1.0": { ThreadType: "Fin", MajorDiameter: 14, Pitch: 1, RootRadius: 0.144, PitchDiameter: 13.35, MinorDiameterMale: 12.773, MinorDiameterFemale: 12.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 13 },
+            "M14 x 1.25": { ThreadType: "Fin", MajorDiameter: 14, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 13.188, MinorDiameterMale: 12.466, MinorDiameterFemale: 12.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 12.8 },
+            "M14 x 1.5": { ThreadType: "Fin", MajorDiameter: 14, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 13.026, MinorDiameterMale: 12.16, MinorDiameterFemale: 12.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 12.5 },
+            "M15 x 1.0": { ThreadType: "Fin", MajorDiameter: 15, Pitch: 1, RootRadius: 0.144, PitchDiameter: 14.35, MinorDiameterMale: 13.773, MinorDiameterFemale: 13.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 14 },
+            "M15 x 1.5": { ThreadType: "Fin", MajorDiameter: 15, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 14.026, MinorDiameterMale: 13.16, MinorDiameterFemale: 13.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 13.5 },
+            "M16 x 1.0": { ThreadType: "Fin", MajorDiameter: 16, Pitch: 1, RootRadius: 0.144, PitchDiameter: 15.35, MinorDiameterMale: 14.773, MinorDiameterFemale: 14.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 15 },
+            "M16 x 1.5": { ThreadType: "Fin", MajorDiameter: 16, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 15.026, MinorDiameterMale: 14.16, MinorDiameterFemale: 14.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 14.5 },
+            "M17 x 1.0": { ThreadType: "Fin", MajorDiameter: 17, Pitch: 1, RootRadius: 0.144, PitchDiameter: 16.35, MinorDiameterMale: 15.733, MinorDiameterFemale: 15.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 16 },
+            "M17 x 1.5": { ThreadType: "Fin", MajorDiameter: 17, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 16.026, MinorDiameterMale: 15.16, MinorDiameterFemale: 15.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 15.5 },
+            "M18 x 1.0": { ThreadType: "Fin", MajorDiameter: 18, Pitch: 1, RootRadius: 0.144, PitchDiameter: 17.35, MinorDiameterMale: 16.773, MinorDiameterFemale: 16.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 17 },
+            "M18 x 1.5": { ThreadType: "Fin", MajorDiameter: 18, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 17.026, MinorDiameterMale: 16.16, MinorDiameterFemale: 16.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 16.5 },
+            "M18 x 2.0": { ThreadType: "Fin", MajorDiameter: 18, Pitch: 2, RootRadius: 0.289, PitchDiameter: 16.701, MinorDiameterMale: 15.546, MinorDiameterFemale: 15.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 16 },
+            "M20 x 1.0": { ThreadType: "Fin", MajorDiameter: 20, Pitch: 1, RootRadius: 0.144, PitchDiameter: 19.35, MinorDiameterMale: 18.773, MinorDiameterFemale: 18.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 19 },
+            "M20 x 1.5": { ThreadType: "Fin", MajorDiameter: 20, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 19.026, MinorDiameterMale: 18.16, MinorDiameterFemale: 18.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 18.5 },
+            "M20 x 2.0": { ThreadType: "Fin", MajorDiameter: 20, Pitch: 2, RootRadius: 0.289, PitchDiameter: 18.701, MinorDiameterMale: 17.546, MinorDiameterFemale: 17.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 18 },
+            "M22 x 1.0": { ThreadType: "Fin", MajorDiameter: 22, Pitch: 1, RootRadius: 0.144, PitchDiameter: 21.35, MinorDiameterMale: 20.773, MinorDiameterFemale: 20.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 21 },
+            "M22 x 1.5": { ThreadType: "Fin", MajorDiameter: 22, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 21.026, MinorDiameterMale: 20.16, MinorDiameterFemale: 20.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 20.5 },
+            "M22 x 2.0": { ThreadType: "Fin", MajorDiameter: 22, Pitch: 2, RootRadius: 0.289, PitchDiameter: 20.701, MinorDiameterMale: 19.546, MinorDiameterFemale: 19.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 20 },
+            "M24 x 1.0": { ThreadType: "Fin", MajorDiameter: 24, Pitch: 1, RootRadius: 0.144, PitchDiameter: 23.35, MinorDiameterMale: 22.773, MinorDiameterFemale: 22.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 23 },
+            "M24 x 1.5": { ThreadType: "Fin", MajorDiameter: 24, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 23.026, MinorDiameterMale: 22.16, MinorDiameterFemale: 22.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 22.5 },
+
+
+        };
 
 
         // ✅ 頁面載入時初始化 Pass 欄位，避免 null
