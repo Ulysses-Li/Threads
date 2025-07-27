@@ -124,7 +124,7 @@
                     </div>
                     <div class="col-md-12">
                         <label class="form-label">Thread Details</label>
-                        <textarea id="threadInfo" class="form-control" style="max-height: 310px; overflow-y: auto;"
+                        <textarea id="threadInfo" class="form-control" style="max-height: 280px; overflow-y: auto;"
                             readonly></textarea>
                     </div>
 
@@ -499,8 +499,7 @@
                 document.getElementById("tapDrill").value = data.TapDrillDiameter;
 
                 // 如果你有 textarea 顯示詳細資訊，也可以這樣處理：
-                const infoText = `
-Thread: ${selectedThread}
+                const infoText = `Thread: ${selectedThread}
 Thread Type: ${data.ThreadType}
 Major Diameter: ${data.MajorDiameter} mm
 Pitch: ${data.Pitch} mm
