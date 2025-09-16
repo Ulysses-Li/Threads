@@ -78,7 +78,7 @@
     <h1 class="mb-4 my-3 d-flex align-items-center">
       <img src="https://nine9.jic-tools.com.tw/themes/nine9/images/logo.png" alt="Logo" height="100"
         style="margin-right:10px;">
-      <strong class="fw-bold">NC Program Generator <br>Parallel & Tapered Thread Milling</strong>
+      <strong class="fw-bold">NC Program Generator for Thread Milling</strong>
     </h1>
 
     <hr class="my-4" />
@@ -86,7 +86,6 @@
       <div class="col-md-7">
         <div class="row g-3">
 
-   
           <!-- Thread mode -->
           <div class="col-md-4 my-3 fw-bold">
             <label class="form-label">Thread Type</label>
@@ -102,7 +101,7 @@
             <label class="form-label">Parallel Family</label>
             <select class="form-select" id="selectParallelFamily" onchange="updateInsertList()">
               <option value="" disabled selected>Select parallel family</option>
-              <option value="parallel60">60° Parallel Thread: such as M, UNC, UNF.</option>
+              <option value="parallel60">60° Parallel Thread: such as M.</option>
               <option value="parallel55">55° Parallel Pipe Thread: ISO/JIS-G, PF, Rp, PS; BSPP</option>
             </select>
           </div>
@@ -122,7 +121,7 @@
           <div class="col-6 col-md-4 fw-bold">
             <label class="form-label">Thread Size</label>
             <select class="form-select" id="selectThreadSize" onchange="onThreadSizeChange()">
-              <option value="" disabled selected>Select Insert first</option>
+              <option value="" disabled selected>Select thread size</option>
             </select>
           </div>
 
@@ -198,7 +197,7 @@
           </div>
           <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Thread Pitch</label>
-            <input type="number" class="form-control" id="pitch" placeholder="mm" />
+            <input type="number" class="form-control" id="pitch" placeholder="mm" step="0.001" />
           </div>
           <div class="col-md-12 fw-bold">
             <label class="form-label">Thread Details</label>
@@ -226,10 +225,9 @@
           <hr class="my-4" />
 
           <!-- Misc -->
-
           <div class="col-6 col-md-4 fw-bold text-center">
-            <label class="form-label ">Depth of Cut</label>
-            <input type="number" class="form-control" id="depth" value="16" />
+            <label class="form-label">Depth of Cut</label>
+            <input type="number" class="form-control" id="depth" value="16" step="0.001" />
           </div>
           <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Tool Number</label>
@@ -240,13 +238,9 @@
             <input type="text" class="form-control" id="gcode" value="G54" />
           </div>
 
-
-
-
           <hr class="my-4" />
 
-
-          <!-- <div class="row g-3"> -->
+          <!-- 座標欄：手機 2 欄、桌機 4 欄 -->
           <div class="col-6 col-md-3 fw-bold text-center">
             <label class="form-label">Coordinate X</label>
             <input type="number" class="form-control" id="x" value="0" />
@@ -263,9 +257,6 @@
             <label class="form-label">Surface Coordinate Z</label>
             <input type="number" class="form-control" id="zsurface" value="0" />
           </div>
-          <!-- </div> -->
-
-
 
           <hr class="my-4" />
         </div>
@@ -405,6 +396,19 @@
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "ThreadMilling_NCCode.txt"; a.click();
+    }
+
+    /* ------- Depth of Cut = ceil(Pitch × 5) 自動帶入 ------- */
+    function updateDepthFromPitchCeil() {
+      const pitchEl = document.getElementById('pitch');
+      const depthEl = document.getElementById('depth');
+      const p = parseFloat(pitchEl.value);
+      if (!isNaN(p) && p > 0) {
+        const decimals = 3; // 無條件進位到 0.001 mm
+        const factor = Math.pow(10, decimals);
+        const val = Math.ceil(p * 5.5 * factor) / factor;
+        depthEl.value = val.toFixed(decimals);
+      }
     }
   </script>
 
@@ -601,6 +605,9 @@ Major Diameter: ${data.MajorDiameter ?? '-'} mm
 Pitch: ${data.Pitch ?? '-'} mm
 Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
       document.getElementById('threadInfo').value = info;
+
+      // 選到 Thread Size 後 → 依規則自動帶 Depth of Cut
+      updateDepthFromPitchCeil();
     }
 
     function onModeChange() {
@@ -630,7 +637,10 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
     // 初始
     window.addEventListener('load', () => {
       updatePassInputs();
-      onModeChange(); // 先隱藏兩塊，等待使用者選 Thread Type
+      onModeChange();              // 等待使用者選 Thread Type
+      updateDepthFromPitchCeil();  // 若一開始 Pitch 就有值，先帶入一次
+      // 使用者手動改 Pitch 時，也自動更新 Depth of Cut（無條件進位）
+      document.getElementById('pitch').addEventListener('input', updateDepthFromPitchCeil);
     });
   </script>
 
@@ -722,6 +732,55 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
       return p;
     }
 
+    // function calculateGCode() {
+    //   try {
+    //     const gcode = (document.getElementById('gcode').value || 'G54').toUpperCase();
+    //     const Xc = Number(document.getElementById('x').value) || 0;
+    //     const Yc = Number(document.getElementById('y').value) || 0;
+    //     const Zsafe = Number(document.getElementById('zsafe').value) || 20;
+    //     const Zsurf = Number(document.getElementById('zsurface').value) || 0;
+    //     const H = Number(document.getElementById('toolNo').value) || 99;
+
+    //     const rpm = Number(document.getElementById('n').value);
+    //     const fz = Number(document.getElementById('fz').value);
+    //     const teeth = Number(document.getElementById('z').value) || 6;
+    //     const feed = (!isNaN(rpm) && !isNaN(fz)) ? rpm * fz * teeth : null;
+
+    //     const toolDia = Number(document.getElementById('toolDiameter').value);
+    //     if (!toolDia || toolDia <= 0) throw new Error('缺少刀徑 (Insert Diameter)');
+
+    //     const OD = Number(document.getElementById('od').value);
+    //     const pitch = Number(document.getElementById('pitch').value);
+    //     const tapDrill = Number(document.getElementById('tapDrill').value);
+    //     if (isNaN(OD)) throw new Error('請提供外徑 (OD)');
+    //     if (isNaN(pitch)) throw new Error('請提供螺距 (Pitch)');
+    //     if (isNaN(tapDrill)) throw new Error('請提供 Tap Drill Diameter');
+
+    //     const depth = Number(document.getElementById('depth').value) || 10;
+    //     if (depth <= 0) throw new Error('Depth of Cut 必須 > 0');
+
+    //     const passCount = parseInt(document.getElementById('passes').value) || 1;
+
+    //     const header = [
+
+    //       `G90 ${gcode} G00 X${Xc.toFixed(3)} Y${Yc.toFixed(3)}`,
+    //       `G43 H${H} Z${Zsafe.toFixed(3)}`
+    //     ];
+
+    //     const mode = document.getElementById('threadMode')?.value || 'parallel';
+    //     let body;
+    //     if (mode === 'tapered') {
+    //       body = genTapered({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount });
+    //     } else {
+    //       body = genParallel({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount });
+    //     }
+    //     document.getElementById("result").value += header.concat(body).join('\n') + '\n';
+    //   } catch (err) {
+    //     alert("計算錯誤：" + err.message);
+    //   }
+    // }
+
+
     function calculateGCode() {
       try {
         const gcode = (document.getElementById('gcode').value || 'G54').toUpperCase();
@@ -751,7 +810,14 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
 
         const passCount = parseInt(document.getElementById('passes').value) || 1;
 
+        // 取得 Thread Size（若未選，輸出 N/A）
+        const sizeEl = document.getElementById('selectThreadSize');
+        const threadSize =
+          (sizeEl && sizeEl.value) ? sizeEl.value :
+            (sizeEl && sizeEl.selectedIndex > -1 ? sizeEl.options[sizeEl.selectedIndex].text : '');
+
         const header = [
+          `(Thread Size: ${threadSize || 'N/A'})`,
           `G90 ${gcode} G00 X${Xc.toFixed(3)} Y${Yc.toFixed(3)}`,
           `G43 H${H} Z${Zsafe.toFixed(3)}`
         ];
@@ -768,6 +834,7 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
         alert("計算錯誤：" + err.message);
       }
     }
+
 
     // Tapered (PT/NPT)：半徑每圈縮 P/32，起刀 Z 抬 1.5P；只在第一筆帶 F
     function genTapered({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount }) {
