@@ -91,8 +91,9 @@
             <label class="form-label">Thread Type</label>
             <select class="form-select" id="threadMode" onchange="onModeChange()">
               <option value="" disabled selected>Select thread type</option>
-              <option value="parallel">Parallel (straight)</option>
-              <option value="tapered">Tapered (PT / NPT)</option>
+              <!-- <option value="parallel">Parallel (straight)</option> -->
+              <option value="parallel">Parallel thread</option>
+              <option value="tapered">Tapered thread (PT / NPT)</option>
             </select>
           </div>
 
@@ -101,7 +102,7 @@
             <label class="form-label">Parallel Family</label>
             <select class="form-select" id="selectParallelFamily" onchange="updateInsertList()">
               <option value="" disabled selected>Select parallel family</option>
-              <option value="parallel60">60° Parallel Thread: such as M.</option>
+              <option value="parallel60">60° Parallel Thread: such as Metric thread.</option>
               <option value="parallel55">55° Parallel Pipe Thread: ISO/JIS-G, PF, Rp, PS; BSPP</option>
             </select>
           </div>
@@ -731,55 +732,6 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
       if (isNaN(p) || p <= 0 || p > 100) throw new Error(`第 ${i} 刀路深度百分比格式錯誤`);
       return p;
     }
-
-    // function calculateGCode() {
-    //   try {
-    //     const gcode = (document.getElementById('gcode').value || 'G54').toUpperCase();
-    //     const Xc = Number(document.getElementById('x').value) || 0;
-    //     const Yc = Number(document.getElementById('y').value) || 0;
-    //     const Zsafe = Number(document.getElementById('zsafe').value) || 20;
-    //     const Zsurf = Number(document.getElementById('zsurface').value) || 0;
-    //     const H = Number(document.getElementById('toolNo').value) || 99;
-
-    //     const rpm = Number(document.getElementById('n').value);
-    //     const fz = Number(document.getElementById('fz').value);
-    //     const teeth = Number(document.getElementById('z').value) || 6;
-    //     const feed = (!isNaN(rpm) && !isNaN(fz)) ? rpm * fz * teeth : null;
-
-    //     const toolDia = Number(document.getElementById('toolDiameter').value);
-    //     if (!toolDia || toolDia <= 0) throw new Error('缺少刀徑 (Insert Diameter)');
-
-    //     const OD = Number(document.getElementById('od').value);
-    //     const pitch = Number(document.getElementById('pitch').value);
-    //     const tapDrill = Number(document.getElementById('tapDrill').value);
-    //     if (isNaN(OD)) throw new Error('請提供外徑 (OD)');
-    //     if (isNaN(pitch)) throw new Error('請提供螺距 (Pitch)');
-    //     if (isNaN(tapDrill)) throw new Error('請提供 Tap Drill Diameter');
-
-    //     const depth = Number(document.getElementById('depth').value) || 10;
-    //     if (depth <= 0) throw new Error('Depth of Cut 必須 > 0');
-
-    //     const passCount = parseInt(document.getElementById('passes').value) || 1;
-
-    //     const header = [
-
-    //       `G90 ${gcode} G00 X${Xc.toFixed(3)} Y${Yc.toFixed(3)}`,
-    //       `G43 H${H} Z${Zsafe.toFixed(3)}`
-    //     ];
-
-    //     const mode = document.getElementById('threadMode')?.value || 'parallel';
-    //     let body;
-    //     if (mode === 'tapered') {
-    //       body = genTapered({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount });
-    //     } else {
-    //       body = genParallel({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount });
-    //     }
-    //     document.getElementById("result").value += header.concat(body).join('\n') + '\n';
-    //   } catch (err) {
-    //     alert("計算錯誤：" + err.message);
-    //   }
-    // }
-
 
     function calculateGCode() {
       try {
