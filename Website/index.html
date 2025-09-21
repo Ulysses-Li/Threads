@@ -78,20 +78,21 @@
     <h1 class="mb-4 my-3 d-flex align-items-center">
       <img src="https://nine9.jic-tools.com.tw/themes/nine9/images/logo.png" alt="Logo" height="100"
         style="margin-right:10px;">
-      <strong class="fw-bold">NC Program Generator — Parallel & Tapered Thread Milling</strong>
+      <strong class="fw-bold">NC Program Generator for Thread Milling</strong>
     </h1>
 
+    <hr class="my-4" />
     <div class="row">
       <div class="col-md-7">
         <div class="row g-3">
-
           <!-- Thread mode -->
           <div class="col-md-4 my-3 fw-bold">
             <label class="form-label">Thread Type</label>
             <select class="form-select" id="threadMode" onchange="onModeChange()">
               <option value="" disabled selected>Select thread type</option>
-              <option value="parallel">Parallel (straight)</option>
-              <option value="tapered">Tapered (PT / NPT)</option>
+              <!-- <option value="parallel">Parallel (straight)</option> -->
+              <option value="parallel">Parallel thread</option>
+              <option value="tapered">Tapered thread (PT / NPT)</option>
             </select>
           </div>
 
@@ -100,7 +101,7 @@
             <label class="form-label">Parallel Family</label>
             <select class="form-select" id="selectParallelFamily" onchange="updateInsertList()">
               <option value="" disabled selected>Select parallel family</option>
-              <option value="parallel60">60° Parallel Thread: such as M, UNC, UNF.</option>
+              <option value="parallel60">60° Parallel Thread: such as Metric thread.</option>
               <option value="parallel55">55° Parallel Pipe Thread: ISO/JIS-G, PF, Rp, PS; BSPP</option>
             </select>
           </div>
@@ -117,22 +118,32 @@
 
           <hr class="my-4" />
 
-          <div class="col-md-4 fw-bold">
+
+          <div class="col-6 col-md-4 fw-bold">
+            <label class="form-label">Thread Hand</label>
+            <select class="form-select" id="threadHand">
+              <option value="" disabled selected>Select hand</option>
+              <option value="RH">Right-hand (RH)</option>
+              <option value="LH">Left-hand (LH)</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-4 fw-bold">
             <label class="form-label">Thread Size</label>
             <select class="form-select" id="selectThreadSize" onchange="onThreadSizeChange()">
-              <option value="" disabled selected>Select Insert first</option>
+              <option value="" disabled selected>Select thread size</option>
             </select>
           </div>
 
           <!-- Insert + material -->
-          <div class="col-md-4 my-3 fw-bold">
+          <div class="col-6 col-md-4 my-3 fw-bold">
             <label class="form-label">Select Insert</label>
             <select class="form-select" id="selectTool" onchange="onInsertChange()">
               <option value="" disabled selected>Select Insert</option>
             </select>
           </div>
 
-          <div class="col-md-4 my-3 fw-bold">
+          <div class="col-12 col-md-4 my-3 fw-bold">
             <label class="form-label">Workpiece material</label>
             <select class="form-select" id="selectMaterial" onchange="updateCuttingSpeed(); updateSelectColor()">
               <option value="" disabled selected>Select material</option>
@@ -153,31 +164,31 @@
           <hr class="my-4" />
 
           <!-- Cutting params -->
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Insert Diameter</label>
             <input type="text" class="form-control bg-light" id="toolDiameter" readonly style="cursor:not-allowed;"
               placeholder="Select Insert/mm" oninput="updateSpindleSpeed()">
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Cutting Speed</label>
             <input type="number" class="form-control" id="vc" placeholder="m/min" oninput="updateSpindleSpeed()" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Spindle Speed</label>
             <input type="number" class="form-control" id="n" placeholder="RPM" readonly
               style="background-color:#d4edda; cursor:not-allowed;" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Number of Teeth</label>
             <input type="number" class="form-control bg-light" style="cursor:not-allowed;" id="z" value="6" readonly
               oninput="updateFeedRate()" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Feed per Tooth</label>
             <input type="number" class="form-control" id="fz" placeholder="mm/tooth" step="0.001"
               oninput="updateFeedRate()" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Feed Rate</label>
             <input type="number" class="form-control" id="vf" placeholder="mm/min" readonly
               style="background-color:#d4edda; cursor:not-allowed;" />
@@ -186,17 +197,17 @@
           <hr class="my-4" />
 
           <!-- Thread geometry -->
-          <div class="col-md-4 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Outer-Dia</label>
             <input type="number" class="form-control" id="od" placeholder="mm" step="0.001" />
           </div>
-          <div class="col-md-4 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Tap Drill Diameter</label>
             <input type="number" class="form-control" id="tapDrill" placeholder="mm" step="0.001" />
           </div>
-          <div class="col-md-4 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Thread Pitch</label>
-            <input type="number" class="form-control" id="pitch" placeholder="mm" />
+            <input type="number" class="form-control" id="pitch" placeholder="mm" step="0.001" />
           </div>
           <div class="col-md-12 fw-bold">
             <label class="form-label">Thread Details</label>
@@ -224,34 +235,35 @@
           <hr class="my-4" />
 
           <!-- Misc -->
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Depth of Cut</label>
-            <input type="number" class="form-control" id="depth" value="16" />
+            <input type="number" class="form-control" id="depth" value="16" step="0.001" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Tool Number</label>
             <input type="number" class="form-control" id="toolNo" value="99" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-4 fw-bold text-center">
             <label class="form-label">Coordinate System</label>
             <input type="text" class="form-control" id="gcode" value="G54" />
           </div>
 
           <hr class="my-4" />
 
-          <div class="col-md-6 fw-bold">
+          <!-- 座標欄：手機 2 欄、桌機 4 欄 -->
+          <div class="col-6 col-md-3 fw-bold text-center">
             <label class="form-label">Coordinate X</label>
             <input type="number" class="form-control" id="x" value="0" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-3 fw-bold text-center">
             <label class="form-label">Coordinate Y</label>
             <input type="number" class="form-control" id="y" value="0" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-3 fw-bold text-center">
             <label class="form-label">Safe Height Z</label>
             <input type="number" class="form-control" id="zsafe" value="20" />
           </div>
-          <div class="col-md-6 fw-bold">
+          <div class="col-6 col-md-3 fw-bold text-center">
             <label class="form-label">Surface Coordinate Z</label>
             <input type="number" class="form-control" id="zsurface" value="0" />
           </div>
@@ -395,7 +407,71 @@
       a.href = URL.createObjectURL(blob);
       a.download = "ThreadMilling_NCCode.txt"; a.click();
     }
+
+    /* ------- Depth of Cut = ceil(Pitch × 5.5) 自動帶入 ------- */
+    // function updateDepthFromPitchCeil() {
+    //   const pitchEl = document.getElementById('pitch');
+    //   const depthEl = document.getElementById('depth');
+    //   const p = parseFloat(pitchEl.value);
+    //   if (!isNaN(p) && p > 0) {
+    //     const decimals = 3; // 無條件進位到 0.001 mm
+    //     const factor = Math.pow(10, decimals);
+    //     const val = Math.ceil(p * 5.5 * factor) / factor;
+    //     depthEl.value = val.toFixed(decimals);
+    //   }
+    // }
   </script>
+
+  <script>
+    // 無條件進位到指定小數
+    function ceilTo(val, decimals = 3) {
+      const f = Math.pow(10, decimals);
+      return Math.ceil(val * f) / f;
+    }
+
+    // 規格名 + threadData 物件 → 決定是否有「預設深度」
+    function getDepthPresetForThread(name, data) {
+      // A) 明寫在資料庫就直接用
+      if (data && data.DepthOfCut != null) return Number(data.DepthOfCut);
+
+      // B) 名稱以 M 開頭（Metric），就用 MajorDiameter × 2
+      //   - 例如 "M6", "M10 x 1.0", "M8 x 0.75" 都會命中
+
+      if (/^M\b/.test(name) && data?.MajorDiameter) {
+        return Number(data.MajorDiameter) * 2;
+      }
+
+
+      // if (name && name.trim().startsWith('M') && data?.MajorDiameter) {
+      //   return Number(data.MajorDiameter) * 2;
+      // }
+
+      // C) 沒有預設
+      return null;
+    }
+
+    // 自動帶入 Depth of Cut（依 A/B/C 規則）
+    function updateDepthAuto() {
+      const sizeSel = document.getElementById('selectThreadSize');
+      const size = sizeSel?.value || '';
+      const data = threadData[size];
+      const depthEl = document.getElementById('depth');
+
+      // 先試圖用 A/B 的預設
+      const preset = getDepthPresetForThread(size, data);
+      if (preset != null) {
+        depthEl.value = Number(preset).toFixed(3);
+        return;
+      }
+
+      // 否則回落到 C：Pitch × 5，無條件進位到 0.001 mm
+      const p = parseFloat(document.getElementById('pitch').value);
+      if (!isNaN(p) && p > 0) {
+        depthEl.value = ceilTo(p * 5, 3).toFixed(3);
+      }
+    }
+  </script>
+
 
   <!-- materials -->
   <script>
@@ -464,8 +540,8 @@
       'R06010-09808': ['NPT 1/4', 'NPT 3/8'],
       'R06010-10810': ['NPT 1/2', 'NPT 3/4'],
       // parallel
-      'R05507-06512': ['G 1/16', 'G 1/8'],
-      'R05510-10018': ['G 1/4', 'G 3/8', 'G 1/2', 'G 5/8', 'G 3/4', 'G 7/8'],
+      'R05507-06512': ['G (PF) 1/16', 'G (PF) 1/8'],
+      'R05510-10018': ['G (PF) 1/4', 'G (PF) 3/8', 'G (PF) 1/2', 'G (PF) 5/8', 'G (PF) 3/4', 'G (PF) 7/8'],
       'R06005-05006': ['M6 x 0.75', 'M7 x 0.75', 'M8 x 0.75', 'M9 x 0.75', 'M10 x 0.75', 'M11 x 0.75'],
       'R06005-05010': ['M6', 'M7', 'M8 x 1.0', 'M9 x 1.0', 'M10 x 1.0', 'M11 x 1.0', 'M12 x 1.0', 'M14 x 1.0', 'M15 x 1.0', 'M16 x 1.0', 'M17 x 1.0', 'M18 x 1.0', 'M20 x 1.0', 'M22 x 1.0', 'M24 x 1.0'],
       'R06007-06810': ['M8', 'M9', 'M8 x 1.0', 'M9 x 1.0', 'M10 x 1.0', 'M10 x 1.25', 'M11 x 1.0', 'M12 x 1.0', 'M12 x 1.25', 'M14 x 1.0', 'M14 x 1.25', 'M15 x 1.0', 'M16 x 1.0', 'M17 x 1.0', 'M18 x 1.0', 'M20 x 1.0', 'M22 x 1.0', 'M24 x 1.0'],
@@ -590,10 +666,14 @@ Major Diameter: ${data.MajorDiameter ?? '-'} mm
 Pitch: ${data.Pitch ?? '-'} mm
 Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
       document.getElementById('threadInfo').value = info;
+
+      // 選到 Thread Size 後 → 依規則自動帶 Depth of Cut
+      updateDepthAuto();
+
     }
 
     function onModeChange() {
-      const mode = document.getElementById('threadMode').value; // '', 'parallel', 'tapered'
+      const mode = document.getElementById('threadMode').value;
       const pWrap = document.getElementById('parallelWrap');
       const tWrap = document.getElementById('taperWrap');
 
@@ -602,6 +682,10 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
       document.getElementById('selectThreadSize').innerHTML = '<option value="" disabled selected>Select thread size</option>';
       document.getElementById('toolDiameter').value = '';
       ['od', 'tapDrill', 'pitch', 'threadInfo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      // 清空 Thread Hand
+      const handEl = document.getElementById('threadHand');
+      if (handEl) handEl.selectedIndex = 0;
+
       updateSpindleSpeed();
 
       // reset family selects
@@ -610,7 +694,7 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
       if (pf) pf.selectedIndex = 0;
       if (tp) tp.selectedIndex = 0;
 
-      // 顯示/隱藏區塊
+      // 顯示/隱藏
       if (mode === 'parallel') { pWrap.style.display = ''; tWrap.style.display = 'none'; }
       else if (mode === 'tapered') { pWrap.style.display = 'none'; tWrap.style.display = ''; }
       else { pWrap.style.display = 'none'; tWrap.style.display = 'none'; }
@@ -619,7 +703,10 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
     // 初始
     window.addEventListener('load', () => {
       updatePassInputs();
-      onModeChange(); // 先隱藏兩塊，等待使用者選 Thread Type
+      onModeChange();              // 等待使用者選 Thread Type
+      updateDepthFromPitchCeil();  // 若一開始 Pitch 就有值，先帶入一次
+      // 使用者手動改 Pitch 時，也自動更新 Depth of Cut（無條件進位）
+      document.getElementById('pitch').addEventListener('input', updateDepthAuto);
     });
   </script>
 
@@ -629,73 +716,76 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
 
     const threadData = {
       // ----- PT / NPT -----
-      "PT 1/4": { MajorDiameter: 13.157, Pitch: P_tpi(19), TapDrillDiameter: 11.113 },
-      "PT 3/8": { MajorDiameter: 16.662, Pitch: P_tpi(19), TapDrillDiameter: 14.684 },
-      "PT 1/2": { MajorDiameter: 20.955, Pitch: P_tpi(14), TapDrillDiameter: 18.256 },
-      "PT 3/4": { MajorDiameter: 26.441, Pitch: P_tpi(14), TapDrillDiameter: 23.813 },
+      "PT 1/4": { MajorDiameter: 13.157, Pitch: P_tpi(19), TapDrillDiameter: 11.113, DepthOfCut: 9.4 },
+      "PT 3/8": { MajorDiameter: 16.662, Pitch: P_tpi(19), TapDrillDiameter: 14.684, DepthOfCut: 9.7 },
 
-      "NPT 1/4": { MajorDiameter: 12.487, Pitch: P_tpi(18), TapDrillDiameter: 11.113 },
-      "NPT 3/8": { MajorDiameter: 15.926, Pitch: P_tpi(18), TapDrillDiameter: 14.288 },
-      "NPT 1/2": { MajorDiameter: 19.772, Pitch: P_tpi(14), TapDrillDiameter: 17.859 },
-      "NPT 3/4": { MajorDiameter: 25.117, Pitch: P_tpi(14), TapDrillDiameter: 23.019 },
+      "PT 1/2": { MajorDiameter: 20.955, Pitch: P_tpi(14), TapDrillDiameter: 18.256, DepthOfCut: 12.7 },
+      "PT 5/8": { MajorDiameter: 22.911, Pitch: P_tpi(14), TapDrillDiameter: 20.9, DepthOfCut: 13.4 }, //這是新的
+      "PT 3/4": { MajorDiameter: 26.441, Pitch: P_tpi(14), TapDrillDiameter: 23.813, DepthOfCut: 14.1 },
+      "PT 7/8": { MajorDiameter: 30.201, Pitch: P_tpi(14), TapDrillDiameter: 28.1, DepthOfCut: 15.2 },  //這是新的
+
+      "NPT 1/4": { MajorDiameter: 13.716, Pitch: P_tpi(18), TapDrillDiameter: 11.113, DepthOfCut: 12 },
+      "NPT 3/8": { MajorDiameter: 17.145, Pitch: P_tpi(18), TapDrillDiameter: 14.288, DepthOfCut: 12 },
+      "NPT 1/2": { MajorDiameter: 21.336, Pitch: P_tpi(14), TapDrillDiameter: 17.859, DepthOfCut: 12 },
+      "NPT 3/4": { MajorDiameter: 26.67, Pitch: P_tpi(14), TapDrillDiameter: 23.019, DepthOfCut: 12 },
 
       // ----- G (BSPP) subset -----
-      "G 1/16": { MajorDiameter: 7.723, Pitch: 0.907, TapDrillDiameter: 6.8 },
-      "G 1/8": { MajorDiameter: 9.728, Pitch: 0.907, TapDrillDiameter: 8.7 },
-      "G 1/4": { MajorDiameter: 13.157, Pitch: 1.337, TapDrillDiameter: 11.7 },
-      "G 3/8": { MajorDiameter: 16.662, Pitch: 1.337, TapDrillDiameter: 15.2 },
-      "G 1/2": { MajorDiameter: 20.955, Pitch: 1.814, TapDrillDiameter: 18.9 },
-      "G 5/8": { MajorDiameter: 22.911, Pitch: 1.814, TapDrillDiameter: 20.9 },
-      "G 3/4": { MajorDiameter: 26.441, Pitch: 1.814, TapDrillDiameter: 24.4 },
-      "G 7/8": { MajorDiameter: 30.201, Pitch: 1.814, TapDrillDiameter: 28.1 },
+      "G (PF) 1/16": { MajorDiameter: 7.723, Pitch: 0.907, TapDrillDiameter: 6.8 },
+      "G (PF) 1/8": { MajorDiameter: 9.728, Pitch: 0.907, TapDrillDiameter: 8.7 },
+      "G (PF) 1/4": { MajorDiameter: 13.157, Pitch: 1.337, TapDrillDiameter: 11.7 },
+      "G (PF) 3/8": { MajorDiameter: 16.662, Pitch: 1.337, TapDrillDiameter: 15.2 },
+      "G (PF) 1/2": { MajorDiameter: 20.955, Pitch: 1.814, TapDrillDiameter: 18.9 },
+      "G (PF) 5/8": { MajorDiameter: 22.911, Pitch: 1.814, TapDrillDiameter: 20.9 },
+      "G (PF) 3/4": { MajorDiameter: 26.441, Pitch: 1.814, TapDrillDiameter: 24.4 },
+      "G (PF) 7/8": { MajorDiameter: 30.201, Pitch: 1.814, TapDrillDiameter: 28.1 },
 
       // ----- Metric Coarse -----
-      "M6": { ThreadType: "Coarse", MajorDiameter: 6, Pitch: 1.0, RootRadius: 0.144, PitchDiameter: 5.35, MinorDiameterMale: 4.773, MinorDiameterFemale: 4.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 5 },
-      "M7": { ThreadType: "Coarse", MajorDiameter: 7, Pitch: 1.0, RootRadius: 0.144, PitchDiameter: 6.35, MinorDiameterMale: 5.773, MinorDiameterFemale: 5.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 6 },
-      "M8": { ThreadType: "Coarse", MajorDiameter: 8, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 7.188, MinorDiameterMale: 6.466, MinorDiameterFemale: 6.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 6.8 },
-      "M9": { ThreadType: "Coarse", MajorDiameter: 9, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 8.188, MinorDiameterMale: 7.466, MinorDiameterFemale: 7.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 7.8 },
-      "M10": { ThreadType: "Coarse", MajorDiameter: 10, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 9.026, MinorDiameterMale: 8.16, MinorDiameterFemale: 8.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 8.5 },
-      "M11": { ThreadType: "Coarse", MajorDiameter: 11, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 10.026, MinorDiameterMale: 9.16, MinorDiameterFemale: 9.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 9.5 },
-      "M12": { ThreadType: "Coarse", MajorDiameter: 12, Pitch: 1.75, RootRadius: 0.253, PitchDiameter: 10.863, MinorDiameterMale: 9.853, MinorDiameterFemale: 10.106, ThreadHeightMale: 1.074, ThreadHeightFemale: 0.947, TapDrillDiameter: 10.2 },
-      "M14": { ThreadType: "Coarse", MajorDiameter: 14, Pitch: 2.0, RootRadius: 0.289, PitchDiameter: 12.701, MinorDiameterMale: 11.564, MinorDiameterFemale: 11.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 12 },
-      "M16": { ThreadType: "Coarse", MajorDiameter: 16, Pitch: 2.0, RootRadius: 0.289, PitchDiameter: 14.701, MinorDiameterMale: 13.546, MinorDiameterFemale: 13.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 14 },
+      "M6": { ThreadType: "Coarse", MajorDiameter: 6, Pitch: 1.0, TapDrillDiameter: 5, DepthOfCut: 12 },
+      "M7": { ThreadType: "Coarse", MajorDiameter: 7, Pitch: 1.0, TapDrillDiameter: 6, DepthOfCut: 14 },
+      "M8": { ThreadType: "Coarse", MajorDiameter: 8, Pitch: 1.25, TapDrillDiameter: 6.8, DepthOfCut: 16 },
+      "M9": { ThreadType: "Coarse", MajorDiameter: 9, Pitch: 1.25, TapDrillDiameter: 7.8, DepthOfCut: 18 },
+      "M10": { ThreadType: "Coarse", MajorDiameter: 10, Pitch: 1.5, TapDrillDiameter: 8.5, DepthOfCut: 20 },
+      "M11": { ThreadType: "Coarse", MajorDiameter: 11, Pitch: 1.5, TapDrillDiameter: 9.5, DepthOfCut: 22 },
+      "M12": { ThreadType: "Coarse", MajorDiameter: 12, Pitch: 1.75, TapDrillDiameter: 10.2, DepthOfCut: 24 },
+      "M14": { ThreadType: "Coarse", MajorDiameter: 14, Pitch: 2.0, TapDrillDiameter: 12, DepthOfCut: 28 },
+      "M16": { ThreadType: "Coarse", MajorDiameter: 16, Pitch: 2.0, TapDrillDiameter: 14, DepthOfCut: 32 },
 
       // ----- Metric Fine (subset) -----
-      "M5.5 x 0.5": { ThreadType: "Fine", MajorDiameter: 5.5, Pitch: 0.5, RootRadius: 0.072, PitchDiameter: 5.175, MinorDiameterMale: 4.887, MinorDiameterFemale: 4.959, ThreadHeightMale: 0.307, ThreadHeightFemale: 0.271, TapDrillDiameter: 5 },
-      "M6 x 0.75": { ThreadType: "Fine", MajorDiameter: 6, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 5.513, MinorDiameterMale: 5.08, MinorDiameterFemale: 5.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 5.2 },
-      "M7 x 0.75": { ThreadType: "Fine", MajorDiameter: 7, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 6.513, MinorDiameterMale: 6.08, MinorDiameterFemale: 6.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 6.2 },
-      "M8 x 0.75": { ThreadType: "Fine", MajorDiameter: 8, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 7.513, MinorDiameterMale: 7.08, MinorDiameterFemale: 7.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 7.2 },
-      "M8 x 1.0": { ThreadType: "Fine", MajorDiameter: 8, Pitch: 1, RootRadius: 0.144, PitchDiameter: 7.35, MinorDiameterMale: 6.773, MinorDiameterFemale: 6.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 7 },
-      "M9 x 0.75": { ThreadType: "Fine", MajorDiameter: 9, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 8.513, MinorDiameterMale: 8.08, MinorDiameterFemale: 8.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 8.2 },
-      "M9 x 1.0": { ThreadType: "Fine", MajorDiameter: 9, Pitch: 1, RootRadius: 0.144, PitchDiameter: 8.35, MinorDiameterMale: 7.773, MinorDiameterFemale: 7.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 8 },
-      "M10 x 0.75": { ThreadType: "Fine", MajorDiameter: 10, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 9.513, MinorDiameterMale: 9.08, MinorDiameterFemale: 9.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 9.2 },
-      "M10 x 1.0": { ThreadType: "Fine", MajorDiameter: 10, Pitch: 1, RootRadius: 0.144, PitchDiameter: 9.35, MinorDiameterMale: 8.773, MinorDiameterFemale: 8.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 9 },
-      "M10 x 1.25": { ThreadType: "Fine", MajorDiameter: 10, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 9.188, MinorDiameterMale: 8.466, MinorDiameterFemale: 8.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 8.8 },
-      "M11 x 0.75": { ThreadType: "Fine", MajorDiameter: 11, Pitch: 0.75, RootRadius: 0.108, PitchDiameter: 10.513, MinorDiameterMale: 10.08, MinorDiameterFemale: 10.188, ThreadHeightMale: 0.46, ThreadHeightFemale: 0.406, TapDrillDiameter: 10.2 },
-      "M11 x 1.0": { ThreadType: "Fine", MajorDiameter: 11, Pitch: 1, RootRadius: 0.144, PitchDiameter: 10.35, MinorDiameterMale: 9.773, MinorDiameterFemale: 9.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 10 },
-      "M12 x 1.0": { ThreadType: "Fine", MajorDiameter: 12, Pitch: 1, RootRadius: 0.144, PitchDiameter: 11.35, MinorDiameterMale: 10.773, MinorDiameterFemale: 10.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 11 },
-      "M12 x 1.25": { ThreadType: "Fine", MajorDiameter: 12, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 11.188, MinorDiameterMale: 10.466, MinorDiameterFemale: 10.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 10.8 },
-      "M12 x 1.5": { ThreadType: "Fine", MajorDiameter: 12, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 11.026, MinorDiameterMale: 10.16, MinorDiameterFemale: 10.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 10.5 },
-      "M14 x 1.0": { ThreadType: "Fine", MajorDiameter: 14, Pitch: 1, RootRadius: 0.144, PitchDiameter: 13.35, MinorDiameterMale: 12.773, MinorDiameterFemale: 12.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 13 },
-      "M14 x 1.25": { ThreadType: "Fine", MajorDiameter: 14, Pitch: 1.25, RootRadius: 0.18, PitchDiameter: 13.188, MinorDiameterMale: 12.466, MinorDiameterFemale: 12.647, ThreadHeightMale: 0.767, ThreadHeightFemale: 0.677, TapDrillDiameter: 12.8 },
-      "M14 x 1.5": { ThreadType: "Fine", MajorDiameter: 14, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 13.026, MinorDiameterMale: 12.16, MinorDiameterFemale: 12.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 12.5 },
-      "M15 x 1.0": { ThreadType: "Fine", MajorDiameter: 15, Pitch: 1, RootRadius: 0.144, PitchDiameter: 14.35, MinorDiameterMale: 13.773, MinorDiameterFemale: 13.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 14 },
-      "M15 x 1.5": { ThreadType: "Fine", MajorDiameter: 15, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 14.026, MinorDiameterMale: 13.16, MinorDiameterFemale: 13.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 13.5 },
-      "M16 x 1.0": { ThreadType: "Fine", MajorDiameter: 16, Pitch: 1, RootRadius: 0.144, PitchDiameter: 15.35, MinorDiameterMale: 14.773, MinorDiameterFemale: 14.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 15 },
-      "M16 x 1.5": { ThreadType: "Fine", MajorDiameter: 16, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 15.026, MinorDiameterMale: 14.16, MinorDiameterFemale: 14.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 14.5 },
-      "M17 x 1.0": { ThreadType: "Fine", MajorDiameter: 17, Pitch: 1, RootRadius: 0.144, PitchDiameter: 16.35, MinorDiameterMale: 15.733, MinorDiameterFemale: 15.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 16 },
-      "M17 x 1.5": { ThreadType: "Fine", MajorDiameter: 17, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 16.026, MinorDiameterMale: 15.16, MinorDiameterFemale: 15.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 15.5 },
-      "M18 x 1.0": { ThreadType: "Fine", MajorDiameter: 18, Pitch: 1, RootRadius: 0.144, PitchDiameter: 17.35, MinorDiameterMale: 16.773, MinorDiameterFemale: 16.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 17 },
-      "M18 x 1.5": { ThreadType: "Fine", MajorDiameter: 18, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 17.026, MinorDiameterMale: 16.16, MinorDiameterFemale: 16.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 16.5 },
-      "M18 x 2.0": { ThreadType: "Fine", MajorDiameter: 18, Pitch: 2, RootRadius: 0.289, PitchDiameter: 16.701, MinorDiameterMale: 15.546, MinorDiameterFemale: 15.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 16 },
-      "M20 x 1.0": { ThreadType: "Fine", MajorDiameter: 20, Pitch: 1, RootRadius: 0.144, PitchDiameter: 19.35, MinorDiameterMale: 18.773, MinorDiameterFemale: 18.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 19 },
-      "M20 x 1.5": { ThreadType: "Fine", MajorDiameter: 20, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 19.026, MinorDiameterMale: 18.16, MinorDiameterFemale: 18.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 18.5 },
-      "M20 x 2.0": { ThreadType: "Fine", MajorDiameter: 20, Pitch: 2, RootRadius: 0.289, PitchDiameter: 18.701, MinorDiameterMale: 17.546, MinorDiameterFemale: 17.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 18 },
-      "M22 x 1.0": { ThreadType: "Fine", MajorDiameter: 22, Pitch: 1, RootRadius: 0.144, PitchDiameter: 21.35, MinorDiameterMale: 20.773, MinorDiameterFemale: 20.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 21 },
-      "M22 x 1.5": { ThreadType: "Fine", MajorDiameter: 22, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 21.026, MinorDiameterMale: 20.16, MinorDiameterFemale: 20.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 20.5 },
-      "M22 x 2.0": { ThreadType: "Fine", MajorDiameter: 22, Pitch: 2, RootRadius: 0.289, PitchDiameter: 20.701, MinorDiameterMale: 19.546, MinorDiameterFemale: 19.835, ThreadHeightMale: 1.227, ThreadHeightFemale: 1.083, TapDrillDiameter: 20 },
-      "M24 x 1.0": { ThreadType: "Fine", MajorDiameter: 24, Pitch: 1, RootRadius: 0.144, PitchDiameter: 23.35, MinorDiameterMale: 22.773, MinorDiameterFemale: 22.917, ThreadHeightMale: 0.613, ThreadHeightFemale: 0.541, TapDrillDiameter: 23 },
-      "M24 x 1.5": { ThreadType: "Fine", MajorDiameter: 24, Pitch: 1.5, RootRadius: 0.217, PitchDiameter: 23.026, MinorDiameterMale: 22.16, MinorDiameterFemale: 22.376, ThreadHeightMale: 0.92, ThreadHeightFemale: 0.812, TapDrillDiameter: 22.5 }
+      "M5.5 x 0.5": { ThreadType: "Fine", MajorDiameter: 5.5, Pitch: 0.5, TapDrillDiameter: 5 },
+      "M6 x 0.75": { ThreadType: "Fine", MajorDiameter: 6, Pitch: 0.75, TapDrillDiameter: 5.2 },
+      "M7 x 0.75": { ThreadType: "Fine", MajorDiameter: 7, Pitch: 0.75, TapDrillDiameter: 6.2 },
+      "M8 x 0.75": { ThreadType: "Fine", MajorDiameter: 8, Pitch: 0.75, TapDrillDiameter: 7.2 },
+      "M8 x 1.0": { ThreadType: "Fine", MajorDiameter: 8, Pitch: 1, TapDrillDiameter: 7 },
+      "M9 x 0.75": { ThreadType: "Fine", MajorDiameter: 9, Pitch: 0.75, TapDrillDiameter: 8.2 },
+      "M9 x 1.0": { ThreadType: "Fine", MajorDiameter: 9, Pitch: 1, TapDrillDiameter: 8 },
+      "M10 x 0.75": { ThreadType: "Fine", MajorDiameter: 10, Pitch: 0.75, TapDrillDiameter: 9.2 },
+      "M10 x 1.0": { ThreadType: "Fine", MajorDiameter: 10, Pitch: 1, TapDrillDiameter: 9 },
+      "M10 x 1.25": { ThreadType: "Fine", MajorDiameter: 10, Pitch: 1.25, TapDrillDiameter: 8.8 },
+      "M11 x 0.75": { ThreadType: "Fine", MajorDiameter: 11, Pitch: 0.75, TapDrillDiameter: 10.2 },
+      "M11 x 1.0": { ThreadType: "Fine", MajorDiameter: 11, Pitch: 1, TapDrillDiameter: 10 },
+      "M12 x 1.0": { ThreadType: "Fine", MajorDiameter: 12, Pitch: 1, TapDrillDiameter: 11 },
+      "M12 x 1.25": { ThreadType: "Fine", MajorDiameter: 12, Pitch: 1.25, TapDrillDiameter: 10.8 },
+      "M12 x 1.5": { ThreadType: "Fine", MajorDiameter: 12, Pitch: 1.5, TapDrillDiameter: 10.5 },
+      "M14 x 1.0": { ThreadType: "Fine", MajorDiameter: 14, Pitch: 1, TapDrillDiameter: 13 },
+      "M14 x 1.25": { ThreadType: "Fine", MajorDiameter: 14, Pitch: 1.25, TapDrillDiameter: 12.8 },
+      "M14 x 1.5": { ThreadType: "Fine", MajorDiameter: 14, Pitch: 1.5, TapDrillDiameter: 12.5 },
+      "M15 x 1.0": { ThreadType: "Fine", MajorDiameter: 15, Pitch: 1, TapDrillDiameter: 14 },
+      "M15 x 1.5": { ThreadType: "Fine", MajorDiameter: 15, Pitch: 1.5, TapDrillDiameter: 13.5 },
+      "M16 x 1.0": { ThreadType: "Fine", MajorDiameter: 16, Pitch: 1, TapDrillDiameter: 15 },
+      "M16 x 1.5": { ThreadType: "Fine", MajorDiameter: 16, Pitch: 1.5, TapDrillDiameter: 14.5 },
+      "M17 x 1.0": { ThreadType: "Fine", MajorDiameter: 17, Pitch: 1, TapDrillDiameter: 16 },
+      "M17 x 1.5": { ThreadType: "Fine", MajorDiameter: 17, Pitch: 1.5, TapDrillDiameter: 15.5 },
+      "M18 x 1.0": { ThreadType: "Fine", MajorDiameter: 18, Pitch: 1, TapDrillDiameter: 17 },
+      "M18 x 1.5": { ThreadType: "Fine", MajorDiameter: 18, Pitch: 1.5, TapDrillDiameter: 16.5 },
+      "M18 x 2.0": { ThreadType: "Fine", MajorDiameter: 18, Pitch: 2, TapDrillDiameter: 16 },
+      "M20 x 1.0": { ThreadType: "Fine", MajorDiameter: 20, Pitch: 1, TapDrillDiameter: 19 },
+      "M20 x 1.5": { ThreadType: "Fine", MajorDiameter: 20, Pitch: 1.5, TapDrillDiameter: 18.5 },
+      "M20 x 2.0": { ThreadType: "Fine", MajorDiameter: 20, Pitch: 2, TapDrillDiameter: 18 },
+      "M22 x 1.0": { ThreadType: "Fine", MajorDiameter: 22, Pitch: 1, TapDrillDiameter: 21 },
+      "M22 x 1.5": { ThreadType: "Fine", MajorDiameter: 22, Pitch: 1.5, TapDrillDiameter: 20.5 },
+      "M22 x 2.0": { ThreadType: "Fine", MajorDiameter: 22, Pitch: 2, TapDrillDiameter: 20 },
+      "M24 x 1.0": { ThreadType: "Fine", MajorDiameter: 24, Pitch: 1, TapDrillDiameter: 23 },
+      "M24 x 1.5": { ThreadType: "Fine", MajorDiameter: 24, Pitch: 1.5, TapDrillDiameter: 22.5 }
     };
   </script>
 
@@ -740,7 +830,21 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
 
         const passCount = parseInt(document.getElementById('passes').value) || 1;
 
+        // 取得 Thread Size
+        const sizeEl = document.getElementById('selectThreadSize');
+        const threadSize =
+          (sizeEl && sizeEl.value) ? sizeEl.value :
+            (sizeEl && sizeEl.selectedIndex > -1 ? sizeEl.options[sizeEl.selectedIndex].text : '');
+
+        // 取得 Thread Hand
+        const handEl = document.getElementById('threadHand');
+        const threadHand =
+          (handEl && handEl.value) ? handEl.value :
+            (handEl && handEl.selectedIndex > -1 ? handEl.options[handEl.selectedIndex].text : '');
+
         const header = [
+          `(Thread Size: ${threadSize || 'N/A'})`,
+          `(Thread Hand: ${threadHand || 'N/A'})`,
           `G90 ${gcode} G00 X${Xc.toFixed(3)} Y${Yc.toFixed(3)}`,
           `G43 H${H} Z${Zsafe.toFixed(3)}`
         ];
@@ -757,6 +861,7 @@ Tap Drill Diameter: ${data.TapDrillDiameter ?? '-'} mm`;
         alert("計算錯誤：" + err.message);
       }
     }
+
 
     // Tapered (PT/NPT)：半徑每圈縮 P/32，起刀 Z 抬 1.5P；只在第一筆帶 F
     function genTapered({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount }) {
