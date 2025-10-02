@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thread Milling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" />
+  <style>
+    textarea {
+      height: 400px;
+    }
+
+    .site-footer {
+      background: #3f474b;
+      color: #e9ecef
+    }
+
+    .site-footer .footer-topbar {
+      height: 10px;
+      background: #c7c7c7
+    }
+
+    .site-footer a {
+      color: #e9f2ff
+    }
+
+    .site-footer a:hover {
+      text-decoration: underline
+    }
+
+    .footer-logo {
+      height: 72px;
+      display: block;
+      margin-inline: auto
+    }
+
+    @media (min-width:1200px) {
+      .footer-logo {
+        height: 80px
+      }
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .35rem .5rem;
+      justify-content: center
+    }
+
+    .badge-row img {
+      height: 48px
+    }
+
+    .duns-img {
+      height: 60px;
+      max-width: 100%
+    }
+
+    .footer-underline {
+      height: 2px;
+      width: 100%;
+      background: rgba(255, 255, 255, .35);
+      margin: .4rem 0 1rem
+    }
+
+    @media (max-width:991.98px) {
+      .site-footer .row>[class*="col-"] {
+        text-align: center
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container my-3">
+    <h1 class="mb-4 my-3 d-flex align-items-center">
+      <img src="https://nine9.jic-tools.com.tw/themes/nine9/images/logo.png" alt="Logo" height="100"
+        style="margin-right:10px;">
+      <strong class="fw-bold">NC Program Generator for Thread Milling</strong>
+    </h1>
+
+    <hr class="my-4" />
+    <div class="row">
+      <div class="col-md-7">
+        <div class="row g-3">
+
+          <!-- Thread mode -->
+          <div class="col-md-4 my-3 fw-bold">
+            <label class="form-label">Thread Type</label>
+            <select class="form-select" id="threadMode" onchange="onModeChange()">
+              <option value="" disabled selected>Select thread type</option>
+              <option value="parallel">Parallel thread</option>
+              <option value="tapered">Tapered thread (PT / NPT)</option>
+            </select>
+          </div>
+
+          <!-- Parallel families -->
+          <div class="col-md-8 my-3 fw-bold" id="parallelWrap" style="display:none;">
+            <label class="form-label">Parallel Family</label>
+            <select class="form-select" id="selectParallelFamily" onchange="updateInsertList()">
+              <option value="" disabled selected>Select parallel family</option>
+              <option value="parallel60">60° Parallel Thread: such as Metric thread.</option>
+              <option value="parallel55">55° Parallel Pipe Thread: ISO/JIS-G, PF, Rp, PS; BSPP</option>
+            </select>
+          </div>
+
+          <!-- Taper families -->
+          <div class="col-md-8 my-3 fw-bold" id="taperWrap" style="display:none;">
+            <label class="form-label">Taper Family</label>
+            <select class="form-select" id="selectTaper" onchange="updateInsertList()">
+              <option value="" disabled selected>Select thread family</option>
+              <option value="55">55° Tapered Pipe Thread: ISO/JIS-R / PT / Rc / BSPT</option>
+              <option value="60">60° Tapered Thread: NPT</option>
+            </select>
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Thread hand -->
+          <!-- <div class="col-6 col-md-4 fw-bold">
+            <label class="form-label">Thread Hand</label>
+            <select class="form-select" id="threadHand">
+              <option value="" disabled selected>Select hand</option>
+              <option value="RH">Right-hand (RH)</option>
+              <option value="LH">Left-hand (LH)</option>
+            </select>
+          </div> -->
+
+          <!-- NEW: Thread Series (only for parallel60) -->
+          <div class="col-6 col-md-4 fw-bold" id="seriesWrap" style="display:none;">
+            <label class="form-label">Thread Series</label>
+            <select class="form-select" id="threadSeries" onchange="onSeriesChange()">
+              <option value="" selected disabled>Select series</option>
+              <option value="M">M (Metric coarse)</option>
+              <option value="MF">MF (Metric fine)</option>
+              <!-- <option value="HC">STI (Wire Thread Insert)</option> -->
+              <option value="UNC">UNC</option>
+              <option value="UNF">UNF</option>
+              <option value="UNEF">UNEF</option>
+            </select>
+          </div>
+
+
+          <!-- Thread size -->
+          <div class="col-6 col-md-4 fw-bold">
+            <label class="form-label">Thread Size</label>
+            <select class="form-select" id="selectThreadSize" onchange="onThreadSizeChange()">
+              <option value="" disabled selected>Select thread size</option>
+            </select>
+          </div>
+
+          <!-- Insert + material -->
+          <div class="col-6 col-md-4 my-3 fw-bold">
+            <label class="form-label">Select Insert</label>
+            <select class="form-select" id="selectTool" onchange="onInsertChange()">
+              <option value="" disabled selected>Select Insert</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4 my-3 fw-bold">
+            <label class="form-label">Workpiece material</label>
+            <select class="form-select" id="selectMaterial" onchange="updateCuttingSpeed(); updateSelectColor()">
+              <option value="" disabled selected>Select material</option>
+              <option value="Material01" style="background-color:#0066CC; color:white; font-weight:bold;">Carbon steel
+              </option>
+              <option value="Material04" style="background-color:#0066CC; color:white; font-weight:bold;">Alloy steel
+              </option>
+              <option value="Material06" style="background-color:#FFC000; font-weight:bold;">Stainless steel</option>
+              <option value="Material07" style="background-color:#FF0000; color:white; font-weight:bold;">Cast iron
+              </option>
+              <option value="Material08" style="background-color:#00B050; color:white; font-weight:bold;">Non-ferrous
+                metal</option>
+              <option value="Material12" style="background-color:#A6A6A6; font-weight:bold;">Hardened steel &lt; HRC50
+              </option>
+            </select>
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Cutting params -->
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Insert Diameter</label>
+            <input type="text" class="form-control bg-light" id="toolDiameter" readonly style="cursor:not-allowed;"
+              placeholder="Select Insert/mm" oninput="updateSpindleSpeed()">
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Cutting Speed</label>
+            <input type="number" class="form-control" id="vc" placeholder="m/min" oninput="updateSpindleSpeed()" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Spindle Speed</label>
+            <input type="number" class="form-control" id="n" placeholder="RPM" readonly
+              style="background-color:#d4edda; cursor:not-allowed;" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Number of Teeth</label>
+            <input type="number" class="form-control bg-light" style="cursor:not-allowed;" id="z" value="6" readonly
+              oninput="updateFeedRate()" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Feed per Tooth</label>
+            <input type="number" class="form-control" id="fz" placeholder="mm/tooth" step="0.001"
+              oninput="updateFeedRate()" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Feed Rate</label>
+            <input type="number" class="form-control" id="vf" placeholder="mm/min" readonly
+              style="background-color:#d4edda; cursor:not-allowed;" />
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Thread geometry -->
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Outer-Dia</label>
+            <input type="number" class="form-control" id="od" placeholder="mm" step="0.001" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Tap Drill Diameter</label>
+            <input type="number" class="form-control" id="tapDrill" placeholder="mm" step="0.001" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Thread Pitch</label>
+            <input type="number" class="form-control" id="pitch" placeholder="mm" step="0.001" />
+          </div>
+          <div class="col-md-12 fw-bold">
+            <label class="form-label">Thread Details</label>
+            <textarea id="threadInfo" class="form-control" style="max-height:110px; overflow-y:auto;"
+              readonly></textarea>
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Passes -->
+          <div class="col-md-6 fw-bold">
+            <label class="form-label">Number Of Passes</label>
+            <select class="form-select" id="passes" onchange="updatePassInputs()">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="col-12 fw-bold">
+            <div class="row" id="passInputs"></div>
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Misc -->
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Depth of Cut</label>
+            <input type="number" class="form-control" id="depth" value="16" step="0.001" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Tool Number</label>
+            <input type="number" class="form-control" id="toolNo" value="99" />
+          </div>
+          <div class="col-6 col-md-4 fw-bold text-center">
+            <label class="form-label">Coordinate System</label>
+            <input type="text" class="form-control" id="gcode" value="G54" />
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Coordinates -->
+          <div class="col-6 col-md-3 fw-bold text-center">
+            <label class="form-label">Coordinate X</label>
+            <input type="number" class="form-control" id="x" value="0" />
+          </div>
+          <div class="col-6 col-md-3 fw-bold text-center">
+            <label class="form-label">Coordinate Y</label>
+            <input type="number" class="form-control" id="y" value="0" />
+          </div>
+          <div class="col-6 col-md-3 fw-bold text-center">
+            <label class="form-label">Safe Height Z</label>
+            <input type="number" class="form-control" id="zsafe" value="20" />
+          </div>
+          <div class="col-6 col-md-3 fw-bold text-center">
+            <label class="form-label">Surface Coordinate Z</label>
+            <input type="number" class="form-control" id="zsurface" value="0" />
+          </div>
+
+          <hr class="my-4" />
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="d-flex justify-content-end mb-2">
+          <button class="btn btn-secondary me-2 fw-bold" onclick="addTool(); countClick('addTool')">Add Tool</button>
+          <button class="btn btn-primary me-2 fw-bold"
+            onclick="calculateGCode(); countClick('calculate')">Generate</button>
+          <button class="btn btn-success me-2 fw-bold" onclick="exportToFile(); countClick('export')">Export</button>
+          <button class="btn btn-danger fw-bold" onclick="clearOutput(); countClick('clear')">Clear</button>
+        </div>
+        <textarea id="result" class="form-control my-3" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <footer class="site-footer mt-5">
+    <div class="footer-topbar"></div>
+    <div class="container py-5">
+      <div class="row gy-4 align-items-start">
+        <div class="col-12 col-md-6 col-lg-3 text-center">
+          <img src="https://nine9.jic-tools.com.tw/upload_files/technology/NC_Program/Jimmore_footer_logo.png"
+            alt="JIMMORE" class="footer-logo mb-3 mx-auto d-block">
+          <div class="badge-row mb-3">
+            <img src="https://nine9.jic-tools.com.tw/upload_files/technology/NC_Program/Jimmore_footer-iso_01.png"
+              alt="SGS">
+            <img src="https://nine9.jic-tools.com.tw/upload_files/technology/NC_Program/Jimmore_footer-iso_02.png"
+              alt="SGS">
+            <img src="https://nine9.jic-tools.com.tw/upload_files/technology/NC_Program/Jimmore_footer-iso_03.png"
+              alt="UKAS">
+          </div>
+          <a href="#" target="_blank" rel="noopener">
+            <img src="https://www.jic-tools.com.tw/themes/jictools2/images/Jimmore-footer-iso_2.png"
+              alt="D-U-N-S Certified" class="duns-img">
+          </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-underline"></div>
+          <address class="mb-0 small lh-lg">
+            No.120-2, Sec-2 Fusing Rd., South District,<br>Taichung City 402014, Taiwan
+          </address>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-underline"></div>
+          <p class="small mb-2">
+            TEL: <a href="tel:+886422605352" class="link-light text-decoration-none">+886-4-22605352</a><br>
+            FAX: +886-4-22608765<br>
+            E-mail: <a href="mailto:trade@jimmore.com.tw"
+              class="link-light text-decoration-none">trade@jimmore.com.tw</a>
+          </p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-underline"></div>
+          <p class="small mb-2">
+            Copyright © <span id="year"></span> Jimmore International Corp.<br>
+            All Rights Reserved.
+          </p>
+          <ul class="list-unstyled small mb-0"></ul>
+        </div>
+      </div>
+    </div>
+    <script>document.getElementById('year').textContent = (new Date()).getFullYear();</script>
+  </footer>
+
+  <!-- helpers -->
+  <script>
+    function updateSelectColor() {
+      const select = document.getElementById("selectMaterial");
+      const opt = select.options[select.selectedIndex];
+      select.style.backgroundColor = opt?.style?.backgroundColor || '';
+      select.style.color = opt?.style?.color || '';
+    }
+    function countClick() { } // no-op
+  </script>
+
+  <!-- materials (vc / fz presets per material) -->
+  <script>
+    const cuttingSpeedMap = {
+      Material01: { vc: 60.0, fz: 0.005 },
+      Material04: { vc: 45.0, fz: 0.005 },
+      Material06: { vc: 45.0, fz: 0.005 },
+      Material07: { vc: 50.0, fz: 0.005 },
+      Material08: { vc: 120.0, fz: 0.0005 },
+      Material12: { vc: 30.0, fz: 0.004 }
+    };
+    function updateCuttingSpeed() {
+      const m = document.getElementById("selectMaterial").value;
+      const vc = document.getElementById("vc");
+      const fz = document.getElementById("fz");
+      const d = cuttingSpeedMap[m];
+      if (d) { vc.value = d.vc; fz.value = d.fz; updateSpindleSpeed(); }
+      else { vc.value = ""; fz.value = ""; }
+    }
+  </script>
+
+  <!-- core UI logic -->
+  <script>
+    function updatePassInputs() {
+      const passCount = parseInt(document.getElementById("passes").value);
+      const container = document.getElementById("passInputs");
+      container.innerHTML = "";
+      for (let i = 0; i < 5; i++) {
+        if (i < passCount) {
+          const col = document.createElement("div");
+          col.className = "col-md-2 text-center";
+          const label = document.createElement("label");
+          label.className = "form-label";
+          const suffix = ["st", "nd", "rd", "th", "th"][i];
+          label.textContent = `${i + 1}${suffix} Pass`;
+          const input = document.createElement("input");
+          input.type = "text"; input.className = "form-control text-center"; input.id = `pass${i + 1}`;
+          if (i === passCount - 1) { input.value = "100%"; input.readOnly = true; }
+          else { input.value = "%"; input.placeholder = "%"; input.readOnly = false; }
+          col.appendChild(label); col.appendChild(input); container.appendChild(col);
+        }
+      }
+    }
+
+    function updateSpindleSpeed() {
+      const d = parseFloat(document.getElementById("toolDiameter").value);
+      const vc = parseFloat(document.getElementById("vc").value);
+      if (!isNaN(d) && d > 0 && !isNaN(vc) && vc > 0) {
+        const n = (1000 * vc) / (Math.PI * d);
+        document.getElementById("n").value = n.toFixed(0);
+      } else {
+        document.getElementById("n").value = "";
+      }
+      updateFeedRate();
+    }
+
+    function updateFeedRate() {
+      const z = parseFloat(document.getElementById("z").value);
+      const fz = parseFloat(document.getElementById("fz").value);
+      const n = parseFloat(document.getElementById("n").value);
+      if (!isNaN(z) && !isNaN(fz) && !isNaN(n) && z > 0 && fz > 0 && n > 0) {
+        const vf = n * fz * z;
+        document.getElementById("vf").value = vf.toFixed(2);
+      } else {
+        document.getElementById("vf").value = "";
+      }
+    }
+
+    function addTool() {
+      const toolNo = document.getElementById("toolNo").value;
+      const spindleSpeed = document.getElementById("n").value;
+      const gcode = `G17 G21 G49 G80\nT${toolNo} M06\nS${spindleSpeed} M03\nM08\n`;
+      document.getElementById("result").value += gcode + "\n";
+    }
+    function clearOutput() { document.getElementById("result").value = ""; }
+    function exportToFile() {
+      let content = document.getElementById("result").value;
+      content += `\nM05\nM09\nG91 G28 Z0.\nG91 G28 Y0.\nM30`;
+      const blob = new Blob([content], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "ThreadMilling_NCCode.txt"; a.click();
+    }
+  </script>
+
+  <!-- depth helpers -->
+  <script>
+    // 無條件進位到指定小數
+    function ceilTo(val, decimals = 3) { const f = Math.pow(10, decimals); return Math.ceil(val * f) / f; }
+
+    // >>> 深度帶入規則 <<<
+    // A) 資料庫有 DepthOfCut/DepthofCut -> 直接用
+    // B) 名稱（或其底層公制名）是 M 開頭，且有 MajorDiameter -> 用 "Major × 2"
+    // C) 其餘 -> 無條件進位到 0.001 的 (Pitch × 5)
+
+    function getDepthPresetForThread(name, data) {
+      if (data && (data.DepthOfCut != null || data.DepthofCut != null))
+        return Number(data.DepthOfCut ?? data.DepthofCut);
+
+      const metricName = baseMetricOf(name); // 由外部檔提供
+      if (/^M\b/i.test(metricName) && data?.MajorDiameter)
+        return Number(data.MajorDiameter) * 2;
+
+      return null;
+    }
+
+    function updateDepthAuto() {
+      const sizeSel = document.getElementById('selectThreadSize');
+      const size = sizeSel?.value || '';
+      const data = getThreadDataForKey(size); // 外部檔提供（含 HC 回退）
+      const depthEl = document.getElementById('depth');
+
+      const preset = getDepthPresetForThread(size, data);
+      if (preset != null) { depthEl.value = Number(preset).toFixed(3); return; }
+
+      const p = parseFloat(document.getElementById('pitch').value);
+      if (!isNaN(p) && p > 0) { depthEl.value = ceilTo(p * 5, 3).toFixed(3); }
+    }
+  </script>
+
+  <!-- calculators (G-code) -->
+  <script>
+    function parsePassPercent(i) {
+      const el = document.getElementById(`pass${i}`);
+      if (!el) return 100;
+      const t = (el.value || '').replace('%', '').trim();
+      if (t === '') return 100;
+      const p = Number(t);
+      if (isNaN(p) || p <= 0 || p > 100) throw new Error(`第 ${i} 刀路深度百分比格式錯誤`);
+      return p;
+    }
+
+    function calculateGCode() {
+      try {
+        const gcode = (document.getElementById('gcode').value || 'G54').toUpperCase();
+        const Xc = Number(document.getElementById('x').value) || 0;
+        const Yc = Number(document.getElementById('y').value) || 0;
+        const Zsafe = Number(document.getElementById('zsafe').value) || 20;
+        const Zsurf = Number(document.getElementById('zsurface').value) || 0;
+        const H = Number(document.getElementById('toolNo').value) || 99;
+
+        const rpm = Number(document.getElementById('n').value);
+        const fz = Number(document.getElementById('fz').value);
+        const teeth = Number(document.getElementById('z').value) || 6;
+        const feed = (!isNaN(rpm) && !isNaN(fz)) ? rpm * fz * teeth : null;
+
+        const toolDia = Number(document.getElementById('toolDiameter').value);
+        if (!toolDia || toolDia <= 0) throw new Error('缺少刀徑 (Insert Diameter)');
+
+        const OD = Number(document.getElementById('od').value);
+        const pitch = Number(document.getElementById('pitch').value);
+        const tapDrill = Number(document.getElementById('tapDrill').value);
+        if (isNaN(OD)) throw new Error('請提供外徑 (OD)');
+        if (isNaN(pitch)) throw new Error('請提供螺距 (Pitch)');
+        if (isNaN(tapDrill)) throw new Error('請提供 Tap Drill Diameter');
+
+        const depth = Number(document.getElementById('depth').value) || 10;
+        if (depth <= 0) throw new Error('Depth of Cut 必須 > 0');
+
+        const passCount = parseInt(document.getElementById('passes').value) || 1;
+
+        const sizeEl = document.getElementById('selectThreadSize');
+        const threadSize = (sizeEl && sizeEl.value) ? sizeEl.value :
+          (sizeEl && sizeEl.selectedIndex > -1 ? sizeEl.options[sizeEl.selectedIndex].text : '');
+
+        const handEl = document.getElementById('threadHand');
+        const threadHand = (handEl && handEl.value) ? handEl.value :
+          (handEl && handEl.selectedIndex > -1 ? handEl.options[handEl.selectedIndex].text : '');
+
+        const header = [
+          `(Thread Size: ${threadSize || 'N/A'})`,
+          // `(Thread Hand: ${threadHand || 'N/A'})`,
+          `G90 ${gcode} G00 X${Xc.toFixed(3)} Y${Yc.toFixed(3)}`,
+          `G43 H${H} Z${Zsafe.toFixed(3)}`
+        ];
+
+        const mode = document.getElementById('threadMode')?.value || 'parallel';
+        let body;
+        if (mode === 'tapered') {
+          body = genTapered({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount });
+        } else {
+          body = genParallel({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount });
+        }
+        document.getElementById("result").value += header.concat(body).join('\n') + '\n';
+      } catch (err) {
+        alert("計算錯誤：" + err.message);
+      }
+    }
+
+    // Tapered (PT/NPT)
+    function genTapered({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount }) {
+      const out = [];
+      const P = pitch, stepDeg = 10, liftZ = 1.5 * P, dR_per_rev = P / 32;
+      const R_finish = (OD - toolDia) / 2, R_start = (tapDrill - toolDia) / 2;
+      if (R_finish <= 0) throw new Error('外徑需大於刀徑');
+      if (R_start < 0) throw new Error('Tap Drill 需大於刀徑');
+
+      for (let i = 1; i <= passCount; i++) {
+        const percent = parsePassPercent(i);
+        const R_base = R_start + (R_finish - R_start) * (percent / 100);
+        const R_entry = R_base + (P / 32) * 1.5;
+        out.push(`G90 G00 X${(Xc + R_entry).toFixed(3)} Y${(Yc + 0).toFixed(3)} Z${(Zsurf + liftZ).toFixed(3)}`);
+
+        let ang = 0, once = true, lastR = R_entry, loop = 0;
+        while (true) {
+          ang += stepDeg;
+          const rev = ang / 360;
+          const zOff = (-P) * rev + liftZ;
+          const Rnow = R_entry - dR_per_rev * rev;
+          const xOff = Math.cos(ang * Math.PI / 180) * Rnow;
+          const yOff = -Math.sin(ang * Math.PI / 180) * Rnow;
+          const X = (Xc + xOff).toFixed(3), Y = (Yc + yOff).toFixed(3), Z = (Zsurf + zOff).toFixed(3);
+          out.push(`G02 X${X} Y${Y} Z${Z} R${Rnow.toFixed(3)}${(feed && once) ? ` F${feed.toFixed(1)}` : ''}`);
+          once = false; lastR = Rnow;
+          if (Math.abs(zOff) >= depth) break;
+          if (++loop > 20000) throw new Error('Angle 迴圈過多，請檢查參數');
+        }
+        out.push(`G02 X${Xc.toFixed(3)} Y${Yc.toFixed(3)} R${(lastR * 0.501).toFixed(3)}`);
+        out.push(`G01 Z${Zsurf.toFixed(3)} F1500.`);
+        out.push(`G00 Z${Zsafe.toFixed(3)}`);
+      }
+      return out;
+    }
+
+    // Parallel
+    function genParallel({ Xc, Yc, Zsafe, Zsurf, feed, toolDia, OD, pitch, tapDrill, depth, passCount }) {
+      const out = [];
+      const turns = Math.ceil(depth / pitch);
+      const R_tap = (tapDrill - toolDia) / 2;
+      const R_fin = (OD - toolDia) / 2;
+      if (R_fin <= 0) throw new Error('外徑需大於刀徑');
+      if (R_tap < 0) throw new Error('Tap Drill 需大於刀徑');
+
+      for (let i = 1; i <= passCount; i++) {
+        const percent = parsePassPercent(i);
+        const R_work = R_tap + (R_fin - R_tap) * (percent / 100);
+
+        let Z = Zsurf - depth;
+        out.push(`G01 Z${Z.toFixed(3)}${feed ? ` F${feed.toFixed(1)}` : ''}`);
+        out.push(`G03 X${(Xc + R_work).toFixed(3)} Y${Yc.toFixed(3)} R${(R_work * 0.501).toFixed(3)}`);
+
+        for (let k = 0; k < turns; k++) {
+          Z += pitch;
+          out.push(`G03 I-${R_work.toFixed(3)} Z${Z.toFixed(3)}`);
+        }
+
+        out.push(`G03 X${Xc.toFixed(3)} Y${Yc.toFixed(3)} R${(R_work * 0.501).toFixed(3)}`);
+        out.push(`G00 Z${Zsafe.toFixed(3)}`);
+      }
+      return out;
+    }
+  </script>
+
+  <!-- 外部：Thread/Tool/Series/DB -->
+  <script src="./MCC/thread-tool-db.js"></script>
+
+  <!-- 後備 onModeChange（外部檔若未提供時才註冊） + 初始化 -->
+  <script>
+    if (typeof onModeChange !== 'function') {
+      window.onModeChange = function () {
+        const mode = document.getElementById('threadMode').value;
+        const pWrap = document.getElementById('parallelWrap');
+        const tWrap = document.getElementById('taperWrap');
+
+        // 清空下游
+        document.getElementById('selectTool').innerHTML = '<option value="" disabled selected>Select Insert</option>';
+        document.getElementById('selectThreadSize').innerHTML = '<option value="" disabled selected>Select thread size</option>';
+        document.getElementById('toolDiameter').value = '';
+        ['od', 'tapDrill', 'pitch', 'threadInfo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        const handEl = document.getElementById('threadHand'); if (handEl) handEl.selectedIndex = 0;
+
+        // reset families + series
+        const pf = document.getElementById('selectParallelFamily'); if (pf) pf.selectedIndex = 0;
+        const tp = document.getElementById('selectTaper'); if (tp) tp.selectedIndex = 0;
+        const seriesSel = document.getElementById('threadSeries'); if (seriesSel) seriesSel.selectedIndex = 0;
+        document.getElementById('seriesWrap').style.display = 'none';
+
+        updateSpindleSpeed();
+
+        if (mode === 'parallel') { pWrap.style.display = ''; tWrap.style.display = 'none'; }
+        else if (mode === 'tapered') { pWrap.style.display = 'none'; tWrap.style.display = ''; }
+        else { pWrap.style.display = 'none'; tWrap.style.display = 'none'; }
+      };
+    }
+
+    // 初始化
+    window.addEventListener('load', () => {
+      updatePassInputs();
+      if (typeof onModeChange === 'function') onModeChange();
+      updateDepthAuto();
+      const pitchEl = document.getElementById('pitch');
+      if (pitchEl) pitchEl.addEventListener('input', updateDepthAuto);
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
