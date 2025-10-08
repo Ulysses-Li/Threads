@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>手機→電腦欄位傳值</title>
 <body style="font-family:system-ui,Arial;padding:16px;background:#efefef">
-  <h3>填好要送到電腦的五個欄位003</h3>
+  <h3>填好要送到電腦的五個欄位004</h3>
   <div>
     <label>tb1</label><input id="tb1" placeholder="例：單號"><br>
     <label>tb2</label><input id="tb2" placeholder="例：料號"><br>
@@ -16,7 +16,9 @@
 
   <script>
     async function send() {
-      const base = '/fill'; // 同源呼叫
+      // const base = '/fill'; // 同源呼叫
+            const base = 'http://192.168.0.67:54321/fill';
+
       const p = new URLSearchParams({
         tb1: tb1.value || '',
         tb2: tb2.value || '',
