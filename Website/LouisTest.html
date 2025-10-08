@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>QR 掃描 → 自動填入 → 送到電腦</title>
+<title>QR 掃描 → 自動填入 → 送到電腦（直連 / 經由代理）</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" />
 <style>
   body{background:#0b1220;color:#e5e7eb}
@@ -12,44 +12,72 @@
   .hint{color:#94a3b8}
   pre{white-space:pre-wrap;word-break:break-all}
   .kbd{padding:.1rem .35rem;border:1px solid #666;border-radius:.25rem;background:#111}
+  .toast{background:#111827;color:#e5e7eb;border:1px solid #334155}
+  .form-switch .form-check-input{cursor:pointer}
 </style>
 </head>
 <body>
 <div class="container py-4">
-  <h1 class="h4 mb-3">📱 QR 掃描 → 自動填入 → 送到電腦</h1>
-  <p class="hint">
+  <h1 class="h4 mb-3">📱 QR 掃描 → 自動填入 → 送到電腦 <span class="badge bg-secondary">v2</span></h1>
+  <p class="hint mb-3">
     建議在 <b>同一來源</b>（例如 <span class="kbd">http://&lt;電腦IP&gt;:54321/ui</span>）開啟本頁。<br>
-    若你從 GitHub Pages（HTTPS）開啟，請在下方填入 <b>HTTP 端點</b> 例如：<span class="kbd">http://192.168.0.67:54321/fill</span>。
+    若你從 GitHub Pages（HTTPS）開啟，直接連 <span class="kbd">http://192.168.…</span> 常被瀏覽器封鎖；可切換 <b>經由代理</b> 模式。
   </p>
 
   <!-- 設定列 -->
   <div class="card bg-dark border-0 shadow mb-4">
     <div class="card-body row g-3 align-items-end">
-      <div class="col-12 col-lg-6">
-        <label class="form-label">送出端點（預設自動偵測同源 /fill）</label>
+      <div class="col-12 col-xl-5">
+        <label class="form-label">送出端點（預設同源 <span class="kbd">/fill</span>）</label>
         <input id="endpoint" class="form-control form-control-sm" placeholder="/fill 或 http://192.168.x.x:54321/fill">
         <div class="form-text text-secondary">會記住在本機裝置（localStorage）。</div>
       </div>
-      <div class="col-6 col-lg-2">
+      <div class="col-12 col-md-6 col-xl-3">
+        <label class="form-label">傳送模式</label>
+        <div class="d-flex gap-3 flex-wrap">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="modeSend" id="modeDirect" value="direct" checked>
+            <label class="form-check-label" for="modeDirect">直連（同網段建議）</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="modeSend" id="modeProxy" value="proxy">
+            <label class="form-check-label" for="modeProxy">經由代理（給 HTTPS → 內網）</label>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-4" id="proxyWrap" style="display:none">
+        <label class="form-label">代理（Bridge）URL</label>
+        <input id="proxyUrl" class="form-control form-control-sm" placeholder="https://你的代理網域/bridge">
+        <div class="form-text text-secondary">代理伺服器會代為存取 endpoint（需你自行部署）。</div>
+      </div>
+
+      <div class="col-6 col-md-3 col-xl-2">
         <label class="form-label">鏡頭</label>
-        <select id="mode" class="form-select form-select-sm">
+        <select id="camFacing" class="form-select form-select-sm">
           <option value="environment" selected>後鏡頭</option>
           <option value="user">前鏡頭</option>
         </select>
       </div>
-      <div class="col-6 col-lg-2">
-        <div class="form-check">
+      <div class="col-6 col-md-3 col-xl-2">
+        <label class="form-label">HTTP 方法</label>
+        <select id="httpMethod" class="form-select form-select-sm">
+          <option value="GET" selected>GET（query）</option>
+          <option value="POST">POST（JSON）</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="form-check form-switch">
           <input id="autoSend" class="form-check-input" type="checkbox" checked>
           <label class="form-check-label" for="autoSend">掃到自動送出</label>
         </div>
-        <div class="form-check">
+        <div class="form-check form-switch">
           <input id="clearOnSend" class="form-check-input" type="checkbox">
           <label class="form-check-label" for="clearOnSend">送出後清空欄位</label>
         </div>
       </div>
-      <div class="col-12 col-lg-2 d-grid gap-2">
+      <div class="col-12 col-md-6 col-xl-3 d-grid gap-2">
         <button id="btnPing" class="btn btn-outline-info btn-sm">Ping 測試</button>
-        <button id="btnSaveEP" class="btn btn-outline-secondary btn-sm">儲存端點</button>
+        <button id="btnSaveCfg" class="btn btn-outline-secondary btn-sm">儲存設定</button>
       </div>
     </div>
   </div>
@@ -68,7 +96,7 @@
             <video id="preview" playsinline muted></video>
           </div>
           <canvas id="work" class="d-none"></canvas>
-          <div class="hint">若畫面未播放，請再按「開始掃描」，或檢查相機權限。</div>
+          <div id="camNote" class="hint">若畫面未播放，請再按「開始掃描」，或檢查相機權限。</div>
         </div>
       </div>
     </div>
@@ -97,7 +125,7 @@
             <div class="col-12"><input id="tb4" class="form-control form-control-sm" placeholder="tb4：例 數量"></div>
             <div class="col-12"><input id="tb5" class="form-control form-control-sm" placeholder="tb5：例 備註"></div>
           </div>
-          <div class="d-flex gap-2 flex-wrap mt-3">
+          <div class="d-flex gap-2 flex-wrap mt-3 align-items-center">
             <button id="btnSend" class="btn btn-success btn-sm">送出到電腦</button>
             <input id="token" class="form-control form-control-sm" style="max-width:12rem" placeholder="可選 token">
             <input id="sep" class="form-control form-control-sm" style="max-width:8rem" placeholder="分隔符(可空)">
@@ -115,11 +143,22 @@
 
   <footer class="mt-4 hint">
     <hr class="border-secondary">
-    <small>© 2025 QR→填入→送出。支援 querystring / CSV / pipe / 空白 / JSON 自動解析。</small>
+    <small>© 2025 QR→填入→送出。支援 querystring / CSV / pipe / 空白 / JSON 自動解析。已內建「直連」與「經由代理」兩種傳輸模式。</small>
   </footer>
 </div>
 
+<!-- Toast for warnings -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+  <div id="toast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div id="toastBody" class="toast-body"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let stream=null, scanning=false;
 const $=id=>document.getElementById(id);
@@ -129,18 +168,51 @@ const els={ preview:$('preview'), work:$('work'),
   btnParse:$('btnParse'), fileInput:$('fileInput'),
   tb1:$('tb1'), tb2:$('tb2'), tb3:$('tb3'), tb4:$('tb4'), tb5:$('tb5'),
   btnSend:$('btnSend'), token:$('token'), sep:$('sep'),
-  endpoint:$('endpoint'), btnPing:$('btnPing'), btnSaveEP:$('btnSaveEP'),
-  mode:$('mode'), autoSend:$('autoSend'), clearOnSend:$('clearOnSend')
+  endpoint:$('endpoint'),
+  modeDirect:$('modeDirect'), modeProxy:$('modeProxy'), proxyUrl:$('proxyUrl'), proxyWrap: document.getElementById('proxyWrap'),
+  camFacing:$('camFacing'), httpMethod:$('httpMethod'),
+  autoSend:$('autoSend'), clearOnSend:$('clearOnSend'),
+  btnPing:$('btnPing'), btnSaveCfg:$('btnSaveCfg'),
 };
 
-// --- 端點偵測/保存 ---
-(function initEndpoint(){
-  const saved = localStorage.getItem('qr_endpoint');
-  // 若同源（例如 http://192.168.0.67:54321/ui），預設用 /fill
+const toastEl = document.getElementById('toast');
+const toastBody = document.getElementById('toastBody');
+const showToast = (msg)=>{ toastBody.textContent = msg; new bootstrap.Toast(toastEl,{delay:5000}).show(); };
+
+// --- 初始化：載入設定 ---
+(function initConfig(){
+  const savedEP = localStorage.getItem('qr_endpoint');
+  const savedMode = localStorage.getItem('qr_modeSend');
+  const savedProxy = localStorage.getItem('qr_proxyUrl');
+  const savedMethod = localStorage.getItem('qr_httpMethod');
+
   const defaultEP = '/fill';
-  els.endpoint.value = saved || defaultEP;
+  els.endpoint.value = savedEP || defaultEP;
+  if(savedMode === 'proxy'){ els.modeProxy.checked=true; els.proxyWrap.style.display='block'; }
+  els.proxyUrl.value = savedProxy || '';
+  if(savedMethod){ els.httpMethod.value = savedMethod; }
 })();
-els.btnSaveEP.onclick=()=>{ localStorage.setItem('qr_endpoint', els.endpoint.value.trim()); alert('端點已儲存'); };
+els.btnSaveCfg.onclick=()=>{
+  localStorage.setItem('qr_endpoint', els.endpoint.value.trim());
+  localStorage.setItem('qr_modeSend', els.modeProxy.checked ? 'proxy' : 'direct');
+  localStorage.setItem('qr_proxyUrl', els.proxyUrl.value.trim());
+  localStorage.setItem('qr_httpMethod', els.httpMethod.value);
+  alert('設定已儲存');
+};
+
+// 切換顯示代理輸入框
+els.modeDirect.addEventListener('change', ()=>{ if(els.modeDirect.checked){ els.proxyWrap.style.display='none'; } });
+els.modeProxy.addEventListener('change', ()=>{ if(els.modeProxy.checked){ els.proxyWrap.style.display='block'; } });
+
+// 安全性提示（HTTPS 頁面直連 HTTP 內網）
+function maybeWarnMixed(){
+  try{
+    const ep = (els.endpoint.value||'').trim();
+    if(location.protocol==='https:' && els.modeDirect.checked && /^http:\/\//i.test(ep)){
+      showToast('目前頁面為 HTTPS，直連 HTTP 內網端點可能被瀏覽器封鎖。請改用「經由代理」或在同網段以 HTTP 開啟本頁。');
+    }
+  }catch(_){}
+}
 
 // --- 相機控制 ---
 function setUI(r){ els.btnStart.disabled=r; els.btnStop.disabled=!r; }
@@ -148,14 +220,15 @@ function stop(){ scanning=false; if(stream){ stream.getTracks().forEach(t=>t.sto
 async function start(){
   try{
     stop();
+    const facing = els.camFacing.value||'environment';
     stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ideal: els.mode.value||'environment'}, width:{ideal:1280}, height:{ideal:720} }, audio:false
+      video:{ facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:720} }, audio:false
     });
     els.preview.srcObject=stream; await els.preview.play();
     scanning=true; setUI(true); requestAnimationFrame(tick);
   }catch(err){ alert('無法啟動相機：'+(err?.message||err)); stop(); }
 }
-els.btnStart.onclick=start; els.btnStop.onclick=stop; els.mode.onchange=()=>{ if(scanning) start(); };
+els.btnStart.onclick=start; els.btnStop.onclick=stop; els.camFacing.onchange=()=>{ if(scanning) start(); };
 
 // --- 掃描循環 ---
 function tick(){
@@ -196,9 +269,7 @@ function tryFill(raw){
     const u = new URL(text);
     const qs = u.searchParams;
     const v1=qs.get('tb1'), v2=qs.get('tb2'), v3=qs.get('tb3'), v4=qs.get('tb4'), v5=qs.get('tb5');
-    if(v1||v2||v3||v4||v5){
-      setTB(v1,v2,v3,v4,v5); return;
-    }
+    if(v1||v2||v3||v4||v5){ setTB(v1,v2,v3,v4,v5); return; }
   }catch(_){/* 非 URL */}
   if(text.includes('=')){ // 純 querystring 形式 tb1=...&tb2=...
     const qs = new URLSearchParams(text);
@@ -216,7 +287,7 @@ function tryFill(raw){
               v4=obj.tb4??obj.TB4??obj.Tb4, v5=obj.tb5??obj.TB5??obj.Tb5;
         if(v1||v2||v3||v4||v5){ setTB(v1,v2,v3,v4,v5); return; }
       }
-    }catch(_){}
+    }catch(_){ }
   }
 
   // 3) 指定分隔符
@@ -256,23 +327,53 @@ els.fileInput.addEventListener('change', e=>{
   imgEl.src=URL.createObjectURL(f);
 });
 
-// --- 送出到電腦 ---
-async function send(){
-  const base = (els.endpoint.value||'').trim() || '/fill';
-  const p = new URLSearchParams({
+// 產生 payload
+function buildPayload(){
+  const payload = {
     tb1: els.tb1.value||'',
     tb2: els.tb2.value||'',
     tb3: els.tb3.value||'',
     tb4: els.tb4.value||'',
-    tb5: els.tb5.value||''
-  });
+    tb5: els.tb5.value||'',
+  };
   const token = (els.token.value||'').trim();
-  if(token) p.append('token', token);
+  if(token) payload.token = token;
+  return payload;
+}
 
+// --- 傳送（直連 or 經由代理）---
+async function send(){
+  const base = (els.endpoint.value||'').trim() || '/fill';
+  const mode = els.modeProxy.checked ? 'proxy' : 'direct';
+  const method = els.httpMethod.value;
+  maybeWarnMixed();
+
+  const data = buildPayload();
   try{
-    const r = await fetch(base + '?' + p.toString(), { method:'GET' });
-    const t = await r.text();
-    alert('回應：' + t);
+    let respText = '';
+    if(mode==='direct'){
+      if(method==='GET'){
+        const p = new URLSearchParams(data);
+        const r = await fetch(base + '?' + p.toString(), { method:'GET' });
+        respText = await r.text();
+      }else{ // POST JSON
+        const r = await fetch(base, {
+          method:'POST', headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify(data)
+        });
+        respText = await r.text();
+      }
+    }else{ // proxy mode
+      const proxy = (els.proxyUrl.value||'').trim();
+      if(!proxy){ alert('請先填入代理（Bridge）URL'); return; }
+      const r = await fetch(proxy, {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ target: base, method, payload: data })
+      });
+      respText = await r.text();
+    }
+
+    alert('回應：' + respText);
     if(els.clearOnSend.checked){ setTB('','','','',''); }
   }catch(e){
     alert('送出失敗：' + (e?.message||e));
@@ -280,15 +381,31 @@ async function send(){
 }
 els.btnSend.onclick=send;
 
-// --- Ping 測試（會把 /fill 換成 /ping）---
-els.btnPing.onclick=async()=>{
+// --- Ping 測試（/fill → /ping）---
+async function doPing(){
   let ep = (els.endpoint.value||'').trim() || '/fill';
-  ep = ep.replace(/\/fill\/?$/i,'/ping');
+  ep = ep.replace(/\/?fill\/?$/i,'/ping');
+  const mode = els.modeProxy.checked ? 'proxy' : 'direct';
+  maybeWarnMixed();
+
   try{
-    const r = await fetch(ep, { method:'GET' });
-    alert('Ping 回應：' + await r.text());
+    let text='';
+    if(mode==='direct'){
+      const r = await fetch(ep, { method:'GET' });
+      text = await r.text();
+    }else{
+      const proxy = (els.proxyUrl.value||'').trim();
+      if(!proxy){ alert('請先填入代理（Bridge）URL'); return; }
+      const r = await fetch(proxy, {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ target: ep, method:'GET' })
+      });
+      text = await r.text();
+    }
+    alert('Ping 回應：' + text);
   }catch(e){ alert('Ping 失敗：' + (e?.message||e)); }
-};
+}
+els.btnPing.onclick=doPing;
 </script>
 </body>
 </html>
