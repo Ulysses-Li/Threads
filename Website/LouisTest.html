@@ -1,191 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Code 掃描（超精簡版）</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" />
-  <style>
-    body { background:#0b1220; color:#e5e7eb; }
-    .card { border-radius: 1rem; }
-    video, canvas { width: 100%; border-radius: .75rem; background:#111827; }
-    .hint { color:#94a3b8; }
-    pre { white-space: pre-wrap; word-break: break-all; }
-  </style>
-</head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>手機→電腦欄位傳值</title>
 <body>
-  <div class="container py-4">
-    <h1 class="h4 mb-3">📱 QR Code 掃描（相機版）</h1>
-    <p class="hint mb-4">建議在 <strong>HTTPS</strong> 或 <code>localhost</code> 開啟本頁，iOS Safari 需允許相機權限。</p>
-
-    <div class="row g-4">
-      <div class="col-12 col-lg-7">
-        <div class="card bg-dark border-0 shadow">
-          <div class="card-body">
-            <div class="d-flex gap-2 flex-wrap mb-3">
-              <button id="btnStart" class="btn btn-success btn-sm">開始掃描</button>
-              <button id="btnStop" class="btn btn-outline-light btn-sm" disabled>停止</button>
-              <select id="mode" class="form-select form-select-sm" style="max-width:14rem">
-                <option value="environment" selected>後鏡頭（environment）</option>
-                <option value="user">前鏡頭（user）</option>
-              </select>
-            </div>
-
-            <div class="ratio ratio-4x3 mb-2">
-              <video id="preview" playsinline muted></video>
-            </div>
-            <canvas id="work" class="d-none"></canvas>
-            <div class="hint">若鏡頭畫面黑屏或未播放，請再次點「開始掃描」，或檢查權限設定。</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-lg-5">
-        <div class="card bg-dark border-0 shadow mb-4">
-          <div class="card-body">
-            <h2 class="h6">掃描結果</h2>
-            <pre id="result" class="p-2 bg-black rounded" style="min-height:5.5rem">（尚未掃到內容）</pre>
-            <div class="d-flex gap-2">
-              <button id="btnCopy" class="btn btn-primary btn-sm" disabled>複製內容</button>
-              <a id="btnOpen" class="btn btn-outline-info btn-sm disabled" target="_blank" rel="noopener">在新分頁開啟（若為網址）</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="card bg-dark border-0 shadow">
-          <div class="card-body">
-            <h2 class="h6">備用：從相簿選擇圖片</h2>
-            <input id="fileInput" type="file" accept="image/*" capture="environment" class="form-control" />
-            <div class="hint mt-2">若相機取用失敗，可直接選擇一張含 QR Code 的照片辨識。</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <footer class="mt-4 hint">
-      <hr class="border-secondary">
-      <small>© 2025 超精簡 QR 掃描頁。只做一件事：讀取 QR Code 並顯示內容。</small>
-    </footer>
+  <h3>填好要送到電腦的五個欄位</h3>
+  <div>
+    <label>tb1</label><input id="tb1" placeholder="例：單號"><br>
+    <label>tb2</label><input id="tb2" placeholder="例：料號"><br>
+    <label>tb3</label><input id="tb3" placeholder="例：批號"><br>
+    <label>tb4</label><input id="tb4" placeholder="例：數量"><br>
+    <label>tb5</label><input id="tb5" placeholder="例：備註"><br>
   </div>
-
-  <!-- jsQR：純前端 QR Code 解析器 -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <p>
+    <button onclick="send()">送出到電腦</button>
+  </p>
 
   <script>
-    let stream = null;
-    let scanning = false;
-    const els = {
-      preview: document.getElementById('preview'),
-      work: document.getElementById('work'),
-      btnStart: document.getElementById('btnStart'),
-      btnStop: document.getElementById('btnStop'),
-      btnCopy: document.getElementById('btnCopy'),
-      btnOpen: document.getElementById('btnOpen'),
-      result: document.getElementById('result'),
-      fileInput: document.getElementById('fileInput'),
-      mode: document.getElementById('mode'),
-    };
-
-    function setUI(running){
-      els.btnStart.disabled = running;
-      els.btnStop.disabled = !running;
-    }
-
-    function showResult(text){
-      els.result.textContent = text || '（沒有內容）';
-      els.btnCopy.disabled = !text;
-      if (/^https?:\/\//i.test(text)){
-        els.btnOpen.classList.remove('disabled');
-        els.btnOpen.href = text;
-      } else {
-        els.btnOpen.classList.add('disabled');
-        els.btnOpen.removeAttribute('href');
+    async function send() {
+      const base = 'http://192.168.0.67:54321/fill';
+      const p = new URLSearchParams({
+        tb1: document.getElementById('tb1').value || '',
+        tb2: document.getElementById('tb2').value || '',
+        tb3: document.getElementById('tb3').value || '',
+        tb4: document.getElementById('tb4').value || '',
+        tb5: document.getElementById('tb5').value || ''
+      });
+      try {
+        const r = await fetch(base + '?' + p.toString(), { method: 'GET' });
+        alert('回應：' + await r.text());
+      } catch (e) {
+        alert('送出失敗：' + e.message);
       }
     }
-
-    function stop(){
-      scanning = false;
-      if (stream){
-        stream.getTracks().forEach(t=>t.stop());
-        stream = null;
-      }
-      setUI(false);
-    }
-
-    async function start(){
-      try{
-        stop();
-        const facing = els.mode.value || 'environment';
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false,
-        });
-        els.preview.srcObject = stream;
-        await els.preview.play();
-        scanning = true;
-        setUI(true);
-        requestAnimationFrame(tick);
-      }catch(err){
-        alert('無法啟動相機：' + (err && err.message ? err.message : err));
-        console.error(err);
-        stop();
-      }
-    }
-
-    function tick(){
-      if (!scanning) return;
-      const video = els.preview;
-      if (video.readyState === video.HAVE_ENOUGH_DATA){
-        const canvas = els.work;
-        const w = video.videoWidth;
-        const h = video.videoHeight;
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, w, h);
-        const img = ctx.getImageData(0, 0, w, h);
-        const code = jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
-        if (code && code.data){
-          showResult(code.data);
-          stop();
-          return;
-        }
-      }
-      requestAnimationFrame(tick);
-    }
-
-    els.btnStart.addEventListener('click', start);
-    els.btnStop.addEventListener('click', stop);
-    els.mode.addEventListener('change', () => { if (scanning) start(); });
-
-    els.btnCopy.addEventListener('click', async ()=>{
-      const text = els.result.textContent.trim();
-      if (!text || text === '（尚未掃到內容）') return;
-      try { await navigator.clipboard.writeText(text); els.btnCopy.textContent = '已複製！'; setTimeout(()=> els.btnCopy.textContent = '複製內容', 1200); } catch(_){}
-    });
-
-    // 圖片備援：選圖後立即解析
-    els.fileInput.addEventListener('change', async (e)=>{
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      const imgEl = new Image();
-      imgEl.onload = ()=>{
-        const canvas = els.work;
-        canvas.width = imgEl.naturalWidth;
-        canvas.height = imgEl.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(imgEl, 0, 0);
-        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(img.data, canvas.width, canvas.height, { inversionAttempts: 'dontInvert' });
-        if (code && code.data){
-          showResult(code.data);
-        } else {
-          showResult('（圖片未偵測到 QR Code）');
-        }
-      };
-      imgEl.onerror = ()=> showResult('（圖片載入失敗）');
-      imgEl.src = URL.createObjectURL(file);
-    });
   </script>
 </body>
 </html>
